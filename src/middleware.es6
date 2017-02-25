@@ -50,13 +50,12 @@ export function forward_to(obj, next) {
   // to respond_to
   let o = {};
   for (let k in obj) {
-    let [ update_fn, child_key ] = obj[k];
+    let { update, model_key } = obj[k];
     // The child builfer function
     let msg_maker = (v)=> uif_msg.make(k, [v]);
 
     o[k] = (model, ...args)=> {
-      console.log("MODEL:", model, "this:", this)
-      return forward_msg(model, child_key, args[0], msg_maker, update_fn, this.logger);
+      return forward_msg(model, model_key, args[0], msg_maker, update, this.logger);
     }
   }
   return respond_to(o, next);

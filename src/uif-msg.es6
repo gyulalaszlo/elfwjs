@@ -15,3 +15,10 @@ export function generator(msgs) {
   return o;
 };
 
+
+/*
+ * Wraps a message in another. Useful for child components
+ */
+export function wrapped(dispatch, msg_generator) {
+  return (inner)=> dispatch(msg_generator(inner));
+}

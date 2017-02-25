@@ -20,6 +20,7 @@ export let make_msg = uif_msg.make;
 export let msg = uif_msg.generator;
 
 
+export let messages = uif_msg;
 export let middleware = uif_middleware;
 
 // Built in dispatchers the distribute and / or transform
@@ -86,7 +87,6 @@ function init_view(container, model, view) {
 
   // the views render function
   let render = (model, dispatch)=> {
-    console.log("RENDER");
     // create the patches
     let newTree = view(model, dispatch);
     let patches = diff(tree, newTree);
@@ -131,14 +131,12 @@ export function app(container, model_factory, view, update, opts={}) {
   // The dispatch function
   // TODO: add queueing
   let dispatch = (msg)=> {
-      console.log("DISPATCH", msg);
 
     // Recursive implementatino
     let impl = (msg)=> {
-      console.log("DISPATCH_IMPL", msg);
       // if no message, dont do anything
       if (!msg) { return Promise.resolve(true); }
-      // otherwise 
+      // otherwise
       return Promise.resolve(msg)
         .then((m)=> {
           // run the inner dispatcher
