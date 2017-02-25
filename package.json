@@ -1,0 +1,33 @@
+{
+  "name": "ttuif",
+  "version": "0.0.1",
+  "description": "",
+  "main": "lib/uif.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "jasmine",
+    "start": "nodemon -e es6 --ignore \"*.js\" --exec npm run build",
+    "build": "babel src -d lib",
+    "dist": "./node_modules/.bin/webpack"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.23.0",
+    "babel-core": "^6.23.1",
+    "babel-loader": "^6.3.2",
+    "babel-preset-env": "^1.1.10",
+    "babel-preset-es2015": "^6.22.0",
+    "babel-register": "^6.23.0",
+    "babel-watch": "^2.0.6",
+    "nodemon": "^1.11.0",
+    "webpack": "^2.2.1"
+  },
+  "dependencies": {
+    "bluebird": "^3.4.7",
+    "virtual-dom": "^2.1.1"
+  }
+}
