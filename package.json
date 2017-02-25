@@ -9,8 +9,8 @@
   },
   "scripts": {
     "test": "jasmine",
-    "start": "nodemon -e es6 --ignore \"*.js\" --exec npm run build",
-    "build": "babel src -d lib",
+    "start": "./node_modules/.bin/nodemon -e es6 --ignore \"*.js\" --exec npm run build",
+    "build": "./node_modules/.bin/babel src -d lib",
     "dist": "./node_modules/.bin/webpack"
   },
   "author": "",
