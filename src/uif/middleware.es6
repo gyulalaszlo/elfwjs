@@ -1,6 +1,6 @@
 import * as Promise from 'bluebird'
 
-import * as uif_msg from './msg'
+import * as uif_msg from './msg.es6'
 
 // MIDDLEWARE SHIT
 // ===============
@@ -30,7 +30,8 @@ function run_next(model, msg, logger, next) {
   }
 }
 
-  // Forwards a messages to the children and wraps them
+
+// Forwards a messages to the children and wraps them
 export function respond_to(obj, next) {
   return (msg, model, logger)=> {
     let {name, values} = msg;

@@ -4,8 +4,9 @@ import diff from 'virtual-dom/diff'
 import patch from 'virtual-dom/patch'
 import createElement from 'virtual-dom/create-element'
 
-import * as uif_msg from './uif/msg'
-import * as uif_middleware from './uif/middleware'
+import * as uif_msg from './uif/msg.es6'
+import * as uif_middleware from './uif/middleware.es6'
+import * as base_logger from './uif/base-logger.es6'
 
 
 /*
@@ -106,7 +107,7 @@ function init_view(container, model, view) {
 export function app(container, model_factory, view, update, opts={}) {
 
   _.defaults(opts, {
-    logger: console,
+    logger: base_logger.make(),
     dispatcher: dispatchers.single_method
   });
 

@@ -1,4 +1,6 @@
-path = require('path');
+'use strict';
+
+var path = require('path');
 
 // webpack.config.js
 module.exports =  {
@@ -32,7 +34,7 @@ module.exports =  {
 
         // exclude: /(node_modules|bower_components)/,
         query: {
-          presets: ['es2015']
+          presets: ['env', 'es2015']
         }
       }
     ]

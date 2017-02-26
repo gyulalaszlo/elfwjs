@@ -1,2 +1,2 @@
-var msg = require('./lib/uif/msg');
+var msg = require('./src/uif/msg.es6');
 module.exports = msg;

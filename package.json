@@ -2,7 +2,7 @@
   "name": "ttuif",
   "version": "0.0.1",
   "description": "",
-  "main": "lib/uif.js",
+  "main": "src/uif.es6",
   "directories": {
     "example": "examples",
     "test": "test"
