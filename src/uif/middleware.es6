@@ -1,14 +1,14 @@
 import * as Promise from 'bluebird'
 
-import * as uif_msg from './uif-msg'
+import * as uif_msg from './msg'
 
 // MIDDLEWARE SHIT
 // ===============
 
 // Forwards messages
-function forward_msg(model, child_key, child_msg, wrapper_msg_fn, child_update_fn, logger) {
+export function forward_msg(model, child_key, child_msg, wrapper_msg_fn, child_update_fn, logger) {
   // update child
-  let [child_model, child_task] = child_update_fn(child_msg, model.datafile, logger);
+  let [child_model, child_task] = child_update_fn(child_msg, model[child_key], logger);
   // update model in parent
   model[child_key] = child_model;
   // run child tasks if needed
@@ -18,6 +18,7 @@ function forward_msg(model, child_key, child_msg, wrapper_msg_fn, child_update_f
     return [model];
   }
 }
+
 
 // Helper that wraps running the next handler in the chain
 function run_next(model, msg, logger, next) {
@@ -36,11 +37,10 @@ export function respond_to(obj, next) {
     if (!obj[name]) {
       return run_next(model, msg, logger, next);
     }
-    values = values != null ? values : [];
     let context = {
       logger: logger
     };
-    return obj[name].apply(context, [model, ...values]);
+    return obj[name](model, values, context);
   };
 }
 
@@ -52,10 +52,10 @@ export function forward_to(obj, next) {
   for (let k in obj) {
     let { update, model_key } = obj[k];
     // The child builfer function
-    let msg_maker = (v)=> uif_msg.make(k, [v]);
+    let msg_maker = (v)=> uif_msg.make(k, v);
 
-    o[k] = (model, ...args)=> {
-      return forward_msg(model, model_key, args[0], msg_maker, update, this.logger);
+    o[k] = (model, msg, ctx)=> {
+      return forward_msg(model, model_key, msg, msg_maker, update, ctx.logger);
     }
   }
   return respond_to(o, next);

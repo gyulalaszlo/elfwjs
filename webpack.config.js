@@ -13,6 +13,9 @@ module.exports =  {
   resolve: {
     extensions: ['.js', '.es6']
   },
+
+  devtool: 'source-map',
+
   module: {
     loaders: [
       {
