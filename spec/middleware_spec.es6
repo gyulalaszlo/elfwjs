@@ -67,39 +67,41 @@ describe('middleware', ()=> {
       };
     };
 
+    let mm = middleware.DEFAULT_MSG_TRAITS.make;
+
 
     it('should dispatch based on the name field of the message', ()=>{
 
         let h = handler();
-        msg = { name: 'foo' };
-        expect(middleware.match(h)(model, msg, logger)).toEqual('foo');
+        expect(middleware.match(h)(model, mm('foo', msg), logger)).toEqual('foo');
         expect_handler_called(h.foo, 1);
         expect_handler_called(h.bar, 0);
     });
 
     it('should be able to return complex objects(?)', ()=>{
         let h = handler();
-        msg = { name: 'bar' };
-        expect(middleware.match(h)(model, msg, logger)).toEqual({ bar: 'bar' });
+        expect(middleware.match(h)(model, mm('bar', msg), logger)).toEqual({ bar: 'bar' });
         expect_handler_called(h.foo, 0);
         expect_handler_called(h.bar, 1);
     });
 
     it('should return null if no handler key is found', ()=>{
         let h = handler();
-        msg = { name: 'baz' };
-        expect(middleware.match(h)(model, msg, logger)).toEqual(null);
+        expect(middleware.match(h)(model, mm('baz', msg), logger)).toEqual(null);
         expect_handler_called(h.foo, 0);
         expect_handler_called(h.bar, 0);
     });
 
 
-    it('should accept a custom message matcher function', ()=> {
+    it('should accept a custom message traits object', ()=> {
         let h = handler();
         msg = { $$foo: 'foo', name: 'bar' };
-        let matcher_fn = (m)=> m.$$foo;
-        expect(middleware.match(h, matcher_fn)(model, msg, logger)).toEqual('foo');
-        expect_handler_called(h.foo, 1);
+        let msg_traits = {
+          get_name: (m)=> m.$$foo,
+          get_value: (m)=> m.name
+        };
+        expect(middleware.match(h, msg_traits)(model, msg, logger)).toEqual('foo');
+        expect_handler_called(h.foo, 1, 'bar');
         expect_handler_called(h.bar, 0);
     });
 
@@ -111,16 +113,21 @@ describe('middleware', ()=> {
 describe('children', ()=> {
   let model, logger, callCount;
 
-  let bar_msg = (v)=> {
-    return { name: 'bar_msg', value: v };
-  };
-
-  const BAZ_MSG = { one: '1', two: '2', plus: '+' };
+  let msgs = middleware.DEFAULT_MSG_TRAITS.generator([
+    'bar_msg',
+    'baz_msg'
+  ]);
+  let bar_msg = msgs.bar_msg;
+  const BAZ_MSG = msgs.baz_msg({ one: '1', two: '2', plus: '+' });
   const FOOBAR_MSG = { foobar: 'foobar' };
 
   // Child handlers
 
-  let child_handler = (mdl, {one, plus, two}, logger)=> {
+  let child_handler = (mdl, msg, logger)=> {
+    let {one, plus, two} = middleware.DEFAULT_MSG_TRAITS.get_value(msg);
+    expect(one).toEqual('1');
+    expect(two).toEqual('2');
+    expect(plus).toEqual('+');
     callCount++;
     expect(mdl).toEqual(model.bar);
     return { baz: `${mdl.baz} = ${one} ${plus} ${two}` };
@@ -238,5 +245,34 @@ describe('children', ()=> {
       let results = c(model, bar_msg(BAZ_MSG), logger);
       check_child_results(results);
     });
+  });
+
+
+  describe('rest_vector', ()=>{
+
+    it('should support POST', ()=>{
+
+      let element_factory = ()=> { return { foo: 'foo' } };
+      let r = middleware.rest.vector();
+
+      let model = [];
+      let res = r([], middleware.rest.msg.POST( element_factory() ), logger);
+      expect(res.new_model).toEqual([{foo:'foo'}]);
+
+    });
+
+
+    // it('should forward messages to the child in a vector, update the model and wrap the messages', ()=>{
+    //   let model = {
+    //     bar: [
+    //       { baz: "baz" },
+    //       { foobar: 'foobar' }
+    //     ]
+    //   };
+
+    //   let c = middleware.children_vector( bar_msg, child_handler_with_msg );
+    //   let results = c(model, bar_msg(BAZ_MSG), logger);
+    //   check_child_results(results);
+    // });
   });
 });

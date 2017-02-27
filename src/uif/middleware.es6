@@ -17,7 +17,26 @@ export const HAS_NAME = (name)=> {
 }
 
 // MIDDLEWARE SHIT
-// ===============
+// ---------------
+
+// TRAITS
+// =====
+//
+// Traits provide simple functions for dealing with parts of the system
+// that are modular and can be replaced by the user.
+
+// Describes messages.
+export const DEFAULT_MSG_TRAITS = {
+  // Getting the name and the value
+  get_name: name_matcher,
+  get_value: msg_value,
+
+  // make a new message if needed
+  make: uif_msg.make,
+  generator: uif_msg.generator
+};
+
+
 
 // Chains middlewares togeather, calling them one after another until one returns true
 export function chain(handlers) {
@@ -34,20 +53,22 @@ export function chain(handlers) {
 
 
 export function name_matcher(msg, obj) { return msg.name; }
-export function msg_value(msg, obj) { return msg.value; }
+export function msg_value(msg, obj) { return msg.values; }
 
 // Tries to match the message to a handler by calling the method matching the'name' attribute
 // of the message, or returns null if no such attribute is found.
 // 
 // matcher_fn is a function that shoudl return a handler for the message
-export function match(obj, matcher_fn=name_matcher) {
+export function match(obj,
+  { get_name, get_value }=DEFAULT_MSG_TRAITS
+) {
   return (model, msg, ...args)=> {
-    let name = matcher_fn(msg, obj);
+    let name = get_name(msg, obj);
     if (!name) {
       throw new ArgumentError(`no name in message: ${JSON.stringify(msg)}`);
     }
     if (!obj[name]) return null
-    return obj[name](model, msg, ...args);
+    return obj[name](model, get_value(msg), ...args);
   };
 }
 
@@ -62,13 +83,15 @@ export function key_assoc(o,k,v){
   return o;
 }
 
-export const DEFAULT_MSG_TRAITS = {
-  get_name: name_matcher,
-  get_value: msg_value,
+// TRAITS
+// =====
+//
+// Traits provide simple functions for dealing with parts of the system
+// that are modular and can be replaced by the user.
 
-  make: uif_msg.make
-};
 
+// The default children structure is simply accessing by
+// name.
 export const DEFAULT_CHILD_TRAITS = {
 
   // Returns the child for the given key
@@ -81,10 +104,12 @@ export const DEFAULT_CHILD_TRAITS = {
     return old_model;
   },
 
+  // Wraps a child local message into another
   wrap_msg: (msg_wrapper, child_key, child_model, child_msg)=> {
     return msg_wrapper(child_msg);
   }
 };
+
 
 
 // Result traits for results without a returning message (AKA only the model is
@@ -114,17 +139,13 @@ export const LEGACY_RESULT_TRAITS = {
 
 
 
+// The simplest result type is the one without any wrapping
 export const DEFAULT_RESULT_TRAITS = {
 
   // default result layout is:
   // {new_model, local_messages, to_parent_messages, to_root_messages}
-  pack: (res)=> {
-    return res;
-  },
-
-  unpack: (res)=> {
-    return res;
-  }
+  pack: (res)=> res,
+  unpack: (res)=>res
 };
 
 
@@ -141,6 +162,7 @@ export function children_bwd(
     let {new_model, local_messages, to_parent_messages, to_root_messages}
       = unpack(handler( child, msg, ...args ));
 
+    // update the child model
     let model_out = update( model, child_key, new_model );
 
     // wrap messages that are local to the child
@@ -160,7 +182,8 @@ export function children_bwd(
   };
 }
 
-// For now, this simply unpacks the message from the surrounding
+
+// For now, this simply unpacks the message and validates it
 export function children_fwd(
   handler,
   child_msg_validator=ALWAYS_TRUE,
@@ -186,15 +209,41 @@ export function children(
 
   let bwd_handler = children_bwd( child_key, msg_wrapper, handler, child_traits, result_traits );
   let fwd_handler = children_fwd( bwd_handler, child_msg_validator, msg_traits );
-  // return (model, msg, ...args)=> {
-  //   bwd_handler( model, msg_traits.get_value( msg ), ...args);
-  // };
   return fwd_handler;
 }
 
 
+function rest_vector(
+  validator=ALWAYS_TRUE,
+  result_traits=DEFAULT_RESULT_TRAITS
+) {
+  return match({
+    POST: (model, new_element)=>{
+      model.push(new_element);
+      let r = result_traits.pack({
+        new_model: model
+      });
+      return r;
+    }
+  });
+}
+
+export const rest = {
 
 
+  msg: uif_msg.generator([
+    'POST',
+    'PUT',
+    'DELETE'
+  ]),
+
+  vector: rest_vector
+
+};
+
+
+
+// LEGACY
 // ========================================
 
 
