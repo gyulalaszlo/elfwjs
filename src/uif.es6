@@ -85,15 +85,46 @@ function init_view(container, model, view) {
   // append the root node
   container.appendChild(rootNode);
 
+  let make_renderer = (start_tree)=> {
+
+    // Defered rendering
+    let render_in_next_frame = false;
+    let tree_to_render = tree;
+    // The renderer
+    let render_fn = (current_time)=> {
+      // create patches
+      let patches = diff(tree, tree_to_render);
+      // update the root note
+      rootNode = patch(rootNode, patches);
+      // update the tree so we can diff the next frame
+      tree = tree_to_render;
+      // reset callback trigger
+      render_in_next_frame = false;
+    };
+
+    return (new_tree)=> {
+      tree_to_render = new_tree;
+      // if we already dispatched a render then no need to request next frame
+      if (render_in_next_frame) {
+        return;
+      }
+      render_in_next_frame = true;
+
+      window.requestAnimationFrame(render_fn);
+    };
+  };
+
+  let view_renderer = make_renderer();
+
   // the views render function
   let render = (model, dispatch)=> {
     // create the patches
     let newTree = view(model, dispatch);
-    let patches = diff(tree, newTree);
+    // let patches = diff(tree, newTree);
+    view_renderer( newTree );
     // update the root note
-    rootNode = patch(rootNode, patches);
+    // rootNode = patch(rootNode, patches);
     // swap the trees
-    tree = newTree;
   };
   return { render };
 };
@@ -143,11 +174,11 @@ export function app(container, model_factory, view, update, opts={}) {
       // otherwise
       return Promise.resolve(msg)
         .then((m)=> {
-          //opts.logger.groupCollapsed(`Dispatch ${JSON.stringify(m).substring(0, 200)}`);
 
           // run the inner dispatcher
-          let [ new_model, new_msg ] = dispatch_impl(m, model);
+          let [ new_model, new_msg, root_msg ] = dispatch_impl(m, model);
 
+          //opts.logger.groupCollapsed(`Dispatch ${JSON.stringify(m).substring(0, 200)}`);
           // update the model
           model = update_model(new_model);
 
@@ -155,8 +186,8 @@ export function app(container, model_factory, view, update, opts={}) {
           renderer.render(model, dispatch);
           // opts.logger.groupEnd();
 
-          // recurse
-          return impl(new_msg);
+          // recurse. Root messages
+          return impl( new_msg ? new_msg : root_msg );
         })
         .catch((e)=> {
           opts.logger.error("DISPATCH:", e, e.stack);

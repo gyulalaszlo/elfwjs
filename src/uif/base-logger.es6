@@ -2,7 +2,7 @@
 
 
 function with_tag(base, {tag, css}) {
-  return (...args)=> base(`%c ${tag} `, css, ...args);
+  return (...args)=> { base(`%c ${tag} `, css, ...args); return args[args.length - 1]; };
 }
 
 function tag_css(css) {
@@ -24,15 +24,20 @@ const TAG_CSS = {
   group: tag('#ddd', '#999'),
   groupEnd: tag('#ddd', '#999'),
   error: tag('#c00', 'white'),
-  warn: tag('#c90', 'white')
+  warn: tag('#c90', 'white'),
+  debug: tag('#09c', 'white')
 }
 
 
 export function make(base=console, tags=TAG_CSS, tagger=with_tag) {
-  let o = {};
+  let o = {
+    $base: base,
+    $tagger: tagger
+  };
   Object.keys(tags).forEach( (t)=> {
     o[t] = tagger( base[t], { tag: t, css: tags[t] });
   });
+
   return o;
 }
 

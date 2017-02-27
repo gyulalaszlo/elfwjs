@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "jasmine",
+    "test": "jasmine spec/**/*.es6",
     "start": "./node_modules/.bin/nodemon -e es6 --ignore \"*.js\" --exec npm run build",
     "build": "./node_modules/.bin/babel src -d lib --source-maps",
     "dist": "./node_modules/.bin/webpack"
