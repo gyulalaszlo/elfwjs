@@ -1,4 +1,3 @@
-import * as _ from 'lodash'
 import * as Promise from 'bluebird'
 import diff from 'virtual-dom/diff'
 import patch from 'virtual-dom/patch'
@@ -137,11 +136,8 @@ function init_view(container, model, view) {
 // Main entry point
 export function app(container, model_factory, view, update, opts={}) {
 
-  _.defaults(opts, {
-    logger: base_logger.make(),
-    dispatcher: dispatchers.single_method
-  });
-
+  opts.logger = opts.logger || base_logger.make();
+  opts.dispatcher = opts.dispatcher || dispatchers.single_method;
 
   // init stuff
   let model = model_factory();
