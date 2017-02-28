@@ -277,7 +277,7 @@ function run_next(model, msg, logger, next) {
 export function respond_to(obj, next) {
   return (msg, model, logger)=> {
     let {name, values} = msg;
-    logger.debug("Respond-to:", msg.name);
+    // logger.debug("Respond-to:", msg.name);
     if (!obj[name]) {
       return run_next(model, msg, logger, next);
     }
@@ -302,11 +302,13 @@ export function forward_to(obj, next) {
     if (!on_root_msg) { on_root_msg = (m, e)=> [m ? m :  e]; };
 
     o[k] = (model, msg, ctx)=> {
-      ctx.logger.debug("Forward:", msg.name, " to:",  model_key);
-      let [ new_model, new_msg, root_msg ] =  ctx.logger.debug("Forward:", msg.name, " to:",  model_key, " with::"
-        , forward_msg(model, model_key, msg, msg_maker, update, ctx.logger)
-      );
+      // ctx.logger.debug("Forward:", msg.name, " to:",  model_key);
+      let [ new_model, new_msg, root_msg ] =  
+//         ctx.logger.debug("Forward:", msg.name, " to:",  model_key, " with::"
+//         , forward_msg(model, model_key, msg, msg_maker, update, ctx.logger)
+//         );
 
+        forward_msg(model, model_key, msg, msg_maker, update, ctx.logger);
       return [ new_model, ...on_root_msg(new_msg, root_msg)]
     }
   }

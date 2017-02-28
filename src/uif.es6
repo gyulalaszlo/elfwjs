@@ -199,6 +199,7 @@ export function app(container, model_factory, view, update, opts={}) {
   return {
     dispatch: dispatch,
     render: renderer.render,
-    msg: make_msg
+    msg: make_msg,
+    model: model,
   };
 };
