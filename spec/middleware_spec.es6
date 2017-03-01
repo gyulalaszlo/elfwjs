@@ -1,5 +1,13 @@
 import * as middleware from '../src/uif/middleware.es6'
+
 import {DEFAULT_MSG_TRAITS} from '../src/uif/traits/messages_traits.es6'
+import {DEFAULT_CHILD_TRAITS} from '../src/uif/traits/child_traits.es6'
+import {
+  NOMSG_RESULT_TRAITS,
+  LEGACY_RESULT_TRAITS,
+  DEFAULT_RESULT_TRAITS,
+} from '../src/uif/traits/result_traits.es6'
+
 
 
 let fake_logger = ()=> jasmine.createSpyObj("logger", ['debug', 'info', 'error']);
@@ -197,8 +205,8 @@ describe('children', ()=> {
     //
     it('should wrap messages from the children and update their model', ()=> {
       let c = middleware.children_bwd( 'bar', bar_msg,  child_handler,
-        middleware.DEFAULT_CHILD_TRAITS,
-        middleware.NOMSG_RESULT_TRAITS
+        DEFAULT_CHILD_TRAITS,
+        NOMSG_RESULT_TRAITS
       );
 
       expect(c(model, BAZ_MSG, logger)).toEqual({
@@ -221,12 +229,12 @@ describe('children', ()=> {
 
     it('should handle legacy results from the update fn', ()=> {
       let c = middleware.children_bwd( 'bar', bar_msg,  legacy_child_handler,
-        middleware.DEFAULT_CHILD_TRAITS,
-        middleware.LEGACY_RESULT_TRAITS
+        DEFAULT_CHILD_TRAITS,
+        LEGACY_RESULT_TRAITS
       );
 
       let result = c(model, BAZ_MSG, logger);
-      check_child_results(middleware.LEGACY_RESULT_TRAITS.unpack(result));
+      check_child_results(LEGACY_RESULT_TRAITS.unpack(result));
     });
   });
 

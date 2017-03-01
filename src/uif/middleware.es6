@@ -3,6 +3,12 @@ import * as Promise from 'bluebird'
 import * as uif_msg from './msg.es6'
 
 import {DEFAULT_MSG_TRAITS} from './traits/messages_traits.es6'
+import {DEFAULT_CHILD_TRAITS} from './traits/child_traits.es6'
+import {
+  NOMSG_RESULT_TRAITS,
+  LEGACY_RESULT_TRAITS,
+  DEFAULT_RESULT_TRAITS,
+} from './traits/result_traits.es6'
 
 
 // DISABLE FOR PRODUCTION
@@ -27,18 +33,6 @@ export const HAS_NAME = (name)=> {
 //
 // Traits provide simple functions for dealing with parts of the system
 // that are modular and can be replaced by the user.
-
-// // Describes messages.
-// export const DEFAULT_MSG_TRAITS = {
-//   // Getting the name and the value
-//   get_name: name_matcher,
-//   get_value: msg_value,
-
-//   // make a new message if needed
-//   make: uif_msg.make,
-//   generator: uif_msg.generator
-// };
-
 
 
 // Chains middlewares togeather, calling them one after another until one returns true
@@ -89,64 +83,6 @@ function key_assoc(o,k,v){
 // Traits provide simple functions for dealing with parts of the system
 // that are modular and can be replaced by the user.
 
-
-// The default children structure is simply accessing by
-// name.
-export const DEFAULT_CHILD_TRAITS = {
-
-  // Returns the child for the given key
-  get: (model, child_key)=> model[child_key],
-
-  // function that updates a parent model based on the
-  // child_key and the value returned by the handler
-  update: (old_model, child_key, child_model, child_msg)=> {
-    old_model[child_key] = child_model;
-    return old_model;
-  },
-
-  // Wraps a child local message into another
-  wrap_msg: (msg_wrapper, child_key, child_model, child_msg)=> {
-    return msg_wrapper(child_msg);
-  }
-};
-
-
-
-// Result traits for results without a returning message (AKA only the model is
-// returned)
-export const NOMSG_RESULT_TRAITS = {
-  pack: ({new_model, local_messages, to_parent_messages, root_messages})=> {
-    return new_model;
-  },
-
-  unpack: (results)=> {
-    return { new_model: results };
-  }
-}
-
-// Legacy result wrappers for older components
-export const LEGACY_RESULT_TRAITS = {
-
-  pack: ({new_model, local_messages, to_parent_messages, to_root_messages})=> {
-    return [ new_model, local_messages, to_parent_messages, to_root_messages ]
-  },
-
-  unpack: (res)=> {
-    let [new_model, local_messages, to_parent_messages, to_root_messages] = res;
-    return { new_model, local_messages, to_parent_messages, to_root_messages };
-  }
-};
-
-
-
-// The simplest result type is the one without any wrapping
-export const DEFAULT_RESULT_TRAITS = {
-
-  // default result layout is:
-  // {new_model, local_messages, to_parent_messages, to_root_messages}
-  pack: (res)=> res,
-  unpack: (res)=>res
-};
 
 
 // Updates the model from the response of handler and wraps any messages
