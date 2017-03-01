@@ -1,4 +1,5 @@
 import * as middleware from '../src/uif/middleware.es6'
+import {DEFAULT_MSG_TRAITS} from '../src/uif/traits/messages_traits.es6'
 
 
 let fake_logger = ()=> jasmine.createSpyObj("logger", ['debug', 'info', 'error']);
@@ -67,7 +68,7 @@ describe('middleware', ()=> {
       };
     };
 
-    let mm = middleware.DEFAULT_MSG_TRAITS.make;
+    let mm = DEFAULT_MSG_TRAITS.make;
 
 
     it('should dispatch based on the name field of the message', ()=>{
@@ -113,7 +114,7 @@ describe('middleware', ()=> {
 describe('children', ()=> {
   let model, logger, callCount;
 
-  let msgs = middleware.DEFAULT_MSG_TRAITS.generator([
+  let msgs = DEFAULT_MSG_TRAITS.generator([
     'bar_msg',
     'baz_msg'
   ]);
@@ -124,7 +125,7 @@ describe('children', ()=> {
   // Child handlers
 
   let child_handler = (mdl, msg, logger)=> {
-    let {one, plus, two} = middleware.DEFAULT_MSG_TRAITS.get_value(msg);
+    let {one, plus, two} = DEFAULT_MSG_TRAITS.get_value(msg);
     expect(one).toEqual('1');
     expect(two).toEqual('2');
     expect(plus).toEqual('+');

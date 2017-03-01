@@ -2,6 +2,9 @@ import * as Promise from 'bluebird'
 
 import * as uif_msg from './msg.es6'
 
+import {DEFAULT_MSG_TRAITS} from './traits/messages_traits.es6'
+
+
 // DISABLE FOR PRODUCTION
 const ASSERT = (cond, e)=> {
   if (!cond) {
@@ -25,16 +28,16 @@ export const HAS_NAME = (name)=> {
 // Traits provide simple functions for dealing with parts of the system
 // that are modular and can be replaced by the user.
 
-// Describes messages.
-export const DEFAULT_MSG_TRAITS = {
-  // Getting the name and the value
-  get_name: name_matcher,
-  get_value: msg_value,
+// // Describes messages.
+// export const DEFAULT_MSG_TRAITS = {
+//   // Getting the name and the value
+//   get_name: name_matcher,
+//   get_value: msg_value,
 
-  // make a new message if needed
-  make: uif_msg.make,
-  generator: uif_msg.generator
-};
+//   // make a new message if needed
+//   make: uif_msg.make,
+//   generator: uif_msg.generator
+// };
 
 
 
@@ -52,12 +55,9 @@ export function chain(handlers) {
 
 
 
-export function name_matcher(msg, obj) { return msg.name; }
-export function msg_value(msg, obj) { return msg.values; }
-
 // Tries to match the message to a handler by calling the method matching the'name' attribute
 // of the message, or returns null if no such attribute is found.
-// 
+//
 // matcher_fn is a function that shoudl return a handler for the message
 export function match(obj,
   { get_name, get_value }=DEFAULT_MSG_TRAITS
@@ -78,7 +78,7 @@ export function match(obj,
 // ========================================
 
 // mutating update function
-export function key_assoc(o,k,v){
+function key_assoc(o,k,v){
   o[k] = v;
   return o;
 }
