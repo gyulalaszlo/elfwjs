@@ -1,4 +1,4 @@
-import {assoc, dissoc, update} from '../src/uif/transform_object.es6'
+import {assoc, dissoc, update, conj} from '../src/uif/transform_object.es6'
 // Use the same spec as JSONPatch
 // [
 //   { "op": "replace", "path": "/baz", "value": "boo" },
@@ -63,6 +63,18 @@ describe('transform_fn', ()=>{
       expect(o.value).toEqual( { foo: 'foobaz', bar: 'bar' });
       expect(o.patches)
         .toEqual([ { op: "replace", path: "/foo", value: "foobaz" } ]);
+    });
+  });
+
+
+  describe('conj', ()=>{
+    it('should append an element to an array', ()=>{
+      let o = conj( ['foo'], 'bar' );
+      expect( o.value ).toEqual( ['foo', 'bar' ] );
+      expect( o.patches )
+        .toEqual([
+          { op: 'add', path: '/1', value: 'bar' }
+        ]);
     });
   });
 
