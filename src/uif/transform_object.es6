@@ -8,6 +8,11 @@ function isUndefined(v) {
 }
 
 
+// Replaces a with b.
+// This function is useful in conjunction with updateIn
+export function replace(a,b) {
+  return { value: b, patches: [{ op: REPLACE, path: '/', value: b}]};
+}
 
 // Adds elements by key to an object (or array)
 export function assoc(obj, attrs) {
@@ -59,4 +64,35 @@ export function conj(arr, el) {
   let path = `/${arr.length}`;
   arr.push(el);
   return { value: arr, patches: [{op: ADD, path, value: el }] };
+}
+
+
+export function updateIn(obj, path, fn, ...args) {
+  let o = obj;
+
+  // if the path is 0 length, we are doing a simple replace
+  if (path.length == 0) {
+    return fn(obj, ...args);
+  }
+
+  // step through the path
+  let last = path.length - 1;
+  for (let i = 0; i < last; ++i) {
+    o = obj[path[i]];
+  }
+
+  let p = path[last];
+  let { value, patches } = fn( o[p], ...args);
+
+  // update the current target
+  o[p] =  value;
+  // update the patch paths
+  patches.forEach((patch)=>{
+    let subPath = patch.path.split('/').filter((e)=> e.length > 0);
+    patch.path = `/${path.concat(subPath).join('/')}`;
+  });
+
+  return { value: obj, patches: patches}
+
+
 }

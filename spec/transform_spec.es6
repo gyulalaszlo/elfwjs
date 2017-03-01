@@ -1,4 +1,4 @@
-import {assoc, dissoc, update, conj} from '../src/uif/transform_object.es6'
+import {replace, assoc, dissoc, update, conj, updateIn} from '../src/uif/transform_object.es6'
 // Use the same spec as JSONPatch
 // [
 //   { "op": "replace", "path": "/baz", "value": "boo" },
@@ -8,6 +8,15 @@ import {assoc, dissoc, update, conj} from '../src/uif/transform_object.es6'
 
 // The transformer is
 describe('transform_fn', ()=>{
+  describe('replace', ()=>{
+    it('should replace the value', ()=> {
+      let o = replace( 'foo', 'bar');
+      expect( o.value ).toEqual('bar');
+      expect( o.patches ).toEqual([
+        { op: 'replace', path: '/', value: 'bar' },
+      ]);
+    });
+  });
 
 
   describe('assoc', ()=>{
@@ -79,5 +88,40 @@ describe('transform_fn', ()=>{
   });
 
 
+
+  describe('updateIn', ()=>{
+    it('should update a non-nested', ()=>{
+      let o = updateIn({foo: {bar: 'bar'}}, [], replace, 'baz' );
+      expect( o.value ).toEqual('baz');
+      expect( o.patches ).toEqual([
+        { op: 'replace', path: '/', value: 'baz'},
+      ]);
+    });
+
+
+    it('should update a nested property', ()=>{
+      let o = updateIn({foo: {bar: 'bar'}}, ['foo', 'bar'], replace, 'baz');
+      expect( o.value ).toEqual({foo: {bar: 'baz'}});
+      expect( o.patches ).toEqual([
+        { op: 'replace', path: '/foo/bar', value: 'baz'},
+      ]);
+    });
+
+    it('should update a nested array with conj', ()=>{
+      let o = updateIn({foo: {bar: []}}, ['foo', 'bar'], conj, 'baz');
+      expect( o.value ).toEqual({foo: {bar: ['baz']}});
+      expect( o.patches ).toEqual([
+        { op: 'add', path: '/foo/bar/0', value: 'baz'},
+      ]);
+    });
+
+    it('should remove a nested key with dissoc', ()=>{
+      let o = updateIn({foo: {bar: {baz: 'baz', yay:'yay'}}}, ['foo', 'bar'], dissoc, ['baz']);
+      expect( o.value ).toEqual({foo: {bar: {yay: 'yay'}}});
+      expect( o.patches ).toEqual([
+        { op: 'remove', path: '/foo/bar/baz' },
+      ]);
+    });
+  });
 
 });
