@@ -1,4 +1,3 @@
-import * as messages from '../src/uif/msg.es6'
 import {DEFAULT_MSG_TRAITS} from '../src/uif/traits/messages_traits.es6'
 
 describe('Default message traits', ()=>{
