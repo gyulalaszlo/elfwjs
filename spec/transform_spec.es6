@@ -59,14 +59,13 @@ describe('transform_fn', ()=>{
   describe('update', ()=>{
 
     it('should call the updater with the object', ()=>{
-
       let o = update( {foo:'foo', bar: 'bar'}, 'foo', (foo)=> foo + "baz" );
-
       expect(o.value).toEqual( { foo: 'foobaz', bar: 'bar' });
       expect(o.patches)
         .toEqual([ { op: "replace", path: "/foo", value: "foobaz" } ]);
-
     });
   });
+
+
 
 });

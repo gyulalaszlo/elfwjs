@@ -3,8 +3,8 @@ function make(name, values) {
 }
 
 
-function get_name(msg, obj) { return msg.name; }
-function get_value(msg, obj) { return msg.values; }
+function getName(msg, obj) { return msg.name; }
+function getValue(msg, obj) { return msg.values; }
 
 /*
  * Generator that allow easy creation of message types
@@ -23,8 +23,8 @@ function generator(msgs) {
 // Describes messages.
 export const DEFAULT_MSG_TRAITS = {
   // Getting the name and the value
-  get_name: get_name,
-  get_value: get_value,
+  getName: getName,
+  getValue: getValue,
 
   // make a new message if needed
   make: make,

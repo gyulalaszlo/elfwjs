@@ -8,8 +8,8 @@ describe('Default message traits', ()=>{
 
     it('should create new messages', ()=>{
       let a  = T.make("hello", { foo: 'bar' });
-      expect( T.get_name(a) ).toEqual( 'hello' );
-      expect( T.get_value(a) ).toEqual( { foo: 'bar' });
+      expect( T.getName(a) ).toEqual( 'hello' );
+      expect( T.getValue(a) ).toEqual( { foo: 'bar' });
     });
 
   });
@@ -23,10 +23,10 @@ describe('Default message traits', ()=>{
       let a = g.foo();
       let b = g.bar({bar: 'bar'});
 
-      expect( T.get_name(a) ).toEqual('foo');
-      expect( T.get_name(b) ).toEqual('bar');
-      expect( T.get_value(a) ).not.toBeDefined();
-      expect( T.get_value(b) ).toEqual({bar:'bar'});
+      expect( T.getName(a) ).toEqual('foo');
+      expect( T.getName(b) ).toEqual('bar');
+      expect( T.getValue(a) ).not.toBeDefined();
+      expect( T.getValue(b) ).toEqual({bar:'bar'});
     });
   });
 

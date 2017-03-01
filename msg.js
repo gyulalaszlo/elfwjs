@@ -1,2 +1,2 @@
-var msg = require('./src/uif/msg.es6');
+var msg = require('./src/legacy/msg.es6');
 module.exports = msg;
