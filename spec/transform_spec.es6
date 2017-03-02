@@ -1,4 +1,4 @@
-import {replace, assoc, dissoc, update, conj, updateIn} from '../src/uif/transform_object.es6'
+import {replace, assoc, dissoc, update, conj, updateIn, disj} from '../src/uif/transform_object.es6'
 // Use the same spec as JSONPatch
 // [
 //   { "op": "replace", "path": "/baz", "value": "boo" },
@@ -83,6 +83,17 @@ describe('transform_fn', ()=>{
       expect( o.patches )
         .toEqual([
           { op: 'add', path: '/1', value: 'bar' }
+        ]);
+    });
+  });
+
+  describe('disj', ()=>{
+    it('should remove  an element from the end of an array', ()=>{
+      let o = disj( ['foo', 'bar', 'baz'], 'bar' );
+      expect( o.value ).toEqual( ['foo', 'baz' ] );
+      expect( o.patches )
+        .toEqual([
+          { op: 'remove', path: '/1', value: 'bar' }
         ]);
     });
   });

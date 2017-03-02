@@ -2,6 +2,18 @@ const ADD = 'add';
 const REPLACE = 'replace';
 const REMOVE = 'remove';
 
+// checking if something is an array
+
+
+var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
+var isArrayLike = function(collection) {
+  var length = collection.length;
+  return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
+};
+
+
+
+let isArray = Array.isArray ? Array.isArray : isArrayLike;
 
 function isUndefined(v) {
   return (typeof v === 'undefined');
@@ -58,12 +70,33 @@ export function update(obj, key, fn) {
 }
 
 
+// ARRAY OPEARATIONS
+// =================
+
+
 // Appends an element to the end of an array
 export function conj(arr, el) {
   if (isUndefined(el)) { return { value: arr, patches: [] }; };
   let path = `/${arr.length}`;
   arr.push(el);
   return { value: arr, patches: [{op: ADD, path, value: el }] };
+}
+
+// Removes  elements from the end of an array
+export function disj(arr, el) {
+  // only valid for arrays
+  const nothing = { value: arr, patches: [] };
+  if (isUndefined(el) || !isArray(arr)) { return nothing; };
+
+  // no patch if not not in the array
+  let idx = arr.indexOf( el );
+  if (idx == -1) { return nothing; }
+
+  // patch
+  let path = `/${idx}`;
+  // delete a[idx];
+  arr.splice(idx, 1);
+  return { value: arr, patches: [{op: REMOVE, path, value: el }] };
 }
 
 
