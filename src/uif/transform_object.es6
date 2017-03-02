@@ -2,8 +2,8 @@ const ADD = 'add';
 const REPLACE = 'replace';
 const REMOVE = 'remove';
 
-// checking if something is an array
-
+// HELPERS
+// =======
 
 var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
 var isArrayLike = function(collection) {
@@ -19,12 +19,18 @@ function isUndefined(v) {
   return (typeof v === 'undefined');
 }
 
+// VERY BASIC :)
+// =============
 
 // Replaces a with b.
 // This function is useful in conjunction with updateIn
 export function replace(a,b) {
   return { value: b, patches: [{ op: REPLACE, path: '/', value: b}]};
 }
+
+
+// OBJECTS
+// =======
 
 // Adds elements by key to an object (or array)
 export function assoc(obj, attrs) {
@@ -99,6 +105,8 @@ export function disj(arr, el) {
   return { value: arr, patches: [{op: REMOVE, path, value: el }] };
 }
 
+// NESTED UPDATE
+// =============
 
 export function updateIn(obj, path, fn, ...args) {
   let o = obj;
