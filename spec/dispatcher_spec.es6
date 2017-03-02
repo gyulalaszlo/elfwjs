@@ -1,9 +1,10 @@
 import * as dispatcher from '../src/uif/dispatcher.es6'
 
-describe('dispatcher', ()=>{
+let M = (value)=> { return { name: 'M', value}; };
+let W = (value)=> { return { name: 'W', value}; };
 
-  let M = (value)=> { return { name: 'M', value}; };
-  let W = (value)=> { return { name: 'M', value}; };
+
+describe('dispatcher', ()=>{
 
   it('should forward calls to the wrapped handler', ()=>{
     let target = jasmine.createSpy()
@@ -25,13 +26,19 @@ describe('dispatcher', ()=>{
     let w = d.wrap(W);
 
     w.dispatch(M('foo'))
-    w.dispatch(M('bar'))
+    expect(target).toHaveBeenCalledWith({ name: 'W', value: { name: 'M', value: 'foo'}});
 
-    expect(target).toHaveBeenCalledWith(W(M('foo')));
-    expect(target).toHaveBeenCalledWith(W(M('bar')));
+    w.dispatch(M('bar'))
+    expect(target).toHaveBeenCalledWith({ name: 'W', value: { name: 'M', value: 'bar'}});
   });
 
 
 
+
+});
+
+
+
+describe('rootDispatcher', ()=>{
 
 });
