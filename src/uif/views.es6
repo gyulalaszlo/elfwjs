@@ -2,6 +2,9 @@ export let NOOP_VIEW_TRAITS = {
   createElement: ({name, attributes, children, key})=> {
     return { name, attributes, children, key };
   },
+
+  init: ()=> {},
+  reduce: ()=> {},
 };
 
 

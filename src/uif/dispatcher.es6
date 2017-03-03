@@ -27,5 +27,5 @@ class Dispatcher {
 }
 
 export function make(target, msgTraits=DEFAULT_MSG_TRAITS) {
-  return new Dispatcher(target);
+  return new Dispatcher(target, msgTraits);
 }

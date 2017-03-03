@@ -4,10 +4,10 @@
 //
 // (aka. its here so we can write `handlers.call( what, ...)` instead
 // of `what(...)`, and that makes us look 100% cooler.
-export function call( handler, model, msg, ...args) {
+export function call( handler, ...args) {
   try {
     // try calling the handler
-    let result = handler(model, msg, ...args);
+    let result = handler(...args);
     return { value: result };
   } catch (e) {
     // report shit
