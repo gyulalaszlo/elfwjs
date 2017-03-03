@@ -34,19 +34,14 @@ export function renderer(view) {
 
 
 
-// Basic middleware for rendering a view
-// export function resultIntegrator(
-//   intergrateResultIntoState=DEFAULT_ROOT_DISPATCHER_TRAITS.reduce
-// ) {
-//   return (state, msg, result)=> {
-
-//     // integrate the result into the state
-//     return intergrateResultIntoState(state, result);
-//   }
-// }
-
+// Result integrators are middleware that "integrate" the result from the
+// update function into the state of the application (both the user model
+// and the backing framework components)
 export let ResultIntegrators = {
 
+  // The default is to have a `model` and a `toParentMessages` key in the
+  // result object. `model` will be the new model and the messages will be
+  // added to the message queue.
   default: requiresInState(
     ['model', 'queue'],
     (state, msg, { model, toParentMessages })=>{
@@ -59,6 +54,7 @@ export let ResultIntegrators = {
     }
   ),
 
+  // Noop simply sets the model to the returned value
   noop: requiresInState(
     ['model'],
     (state, msg, result)=> {
