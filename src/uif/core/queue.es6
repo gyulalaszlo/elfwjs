@@ -8,6 +8,7 @@ export class Queue {
   // Pushes an element to the end of the queue
   push(o) {
     this._elements.push(o);
+    return this;
   }
 
   // Returns the elements in the queue
@@ -15,8 +16,10 @@ export class Queue {
     return this._elements;
   }
 
-  append(els) {
+  // wraps Array.prototype.concat
+  concat(els) {
     this._elements = this._elements.concat(els);
+    return this;
   }
 
   // Runs a FIFO reduction on the elements of the queue.

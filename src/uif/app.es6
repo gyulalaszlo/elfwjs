@@ -43,17 +43,24 @@ export function make(
   let dispatchMsgsInQueue = singleInstance(()=>{
 
     state = state.queue.reduce((state, msg)=>{
-      // we try to catch errors in the update here
-      let updateResult = handlers.call( update, model, msg );
 
-      if (updateResult.error) {
-        // no more work for us for now
-        onError(updateResult.error, msg, model);
+      try {
+      // we try to catch errors in the update here
+        let result = update(model, msg );
+        return dispatcherTraits.reduce(state, result);
+      } catch (e) {
+        onError(e, msg, model);
         return state;
       }
 
+      // if (updateResult.error) {
+      //   // no more work for us for now
+      //   onError(updateResult.error, msg, model);
+      //   return state;
+      // }
+
       // use the dispatcher traits to dispatch the messages
-      return dispatcherTraits.reduce(state, updateResult.value);
+      // return dispatcherTraits.reduce(state, updateResult.value);
     }, state);
   });
 

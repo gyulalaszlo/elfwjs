@@ -19,7 +19,7 @@ describe('Queue', ()=>{
 
 
   it('should allow concatenating elements', ()=>{
-    q.append(['foo', 'bar', 'baz']);
+    q.concat(['foo', 'bar', 'baz']);
     expect(q.elements()).toEqual(['foo', 'bar', 'baz']);
   });
 
@@ -27,7 +27,7 @@ describe('Queue', ()=>{
   describe('reduce', ()=>{
 
     it('should provide a reduce function', ()=>{
-      q.append(['foo', 'bar', 'baz']);
+      q.concat(['foo', 'bar', 'baz']);
 
       let res = q.reduce((memo, e)=>{
         return memo + e.length;
@@ -38,7 +38,7 @@ describe('Queue', ()=>{
 
 
     it('should allow adding elements to the queue during reduce', ()=>{
-      q.append(['foo', 'bar', 'baz']);
+      q.concat(['foo', 'bar', 'baz']);
 
       let res = q.reduce((memo, e)=>{
         if (e == 'bar') q.push('baz');
