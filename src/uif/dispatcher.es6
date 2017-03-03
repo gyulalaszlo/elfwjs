@@ -1,4 +1,3 @@
-import { DEFAULT_MSG_TRAITS } from './traits/messages_traits.es6'
 
 
 export let DEFAULT_ROOT_DISPATCHER_TRAITS = {
@@ -33,9 +32,8 @@ export let  NOOP_ROOT_WRAPPER_TRAITS = {
 
 class Dispatcher {
   // Creates a new dispatcher with the given message traits
-  constructor(target, msgTraits) {
+  constructor(target) {
     this.target = target;
-    this.msgTraits = msgTraits;
   }
 
   // dispatch a message to our target
@@ -51,12 +49,11 @@ class Dispatcher {
     // store the target in a local
     let target = this.target;
     return new Dispatcher(
-      (msg, ...args)=> target(msgGenerator(msg), ...args),
-      this.msgTraits
+      (msg, ...args)=> target(msgGenerator(msg), ...args)
     );
   }
 }
 
-export function make(target, msgTraits=DEFAULT_MSG_TRAITS) {
-  return new Dispatcher(target, msgTraits);
+export function make(target) {
+  return new Dispatcher(target);
 }

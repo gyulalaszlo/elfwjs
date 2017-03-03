@@ -2,23 +2,16 @@ import {DEFAULT_MSG_TRAITS} from './traits/messages_traits.es6'
 // import middleware from '../src/uif/middleware.es6'
 import * as dispatcher from './dispatcher.es6'
 import * as handlers from './handlers.es6'
+import {singleInstance} from './functional.es6'
+import {Queue} from './core/queue.es6'
 
 
-// Returns a wrapped function, that returns immediately
-// if the function is already running (thereby hindering recursion)
+
+
+// Dispatch messages until there is stuff in the queue.
 //
-// Allows only a single instance of the function to run
-function singleInstance(fn) {
-  let isRunning = false;
-  return (...args)=> {
-    if (isRunning) return null;
-    isRunning = true;
-    fn(...args);
-    isRunning = false;
-  };
-}
-
-
+// This is based on the assumption that update always returns ASAP, and any
+// longer running stuff is issues via other systems
 export function make(
   {model, update, view, Msg},
   onError=console.error,
@@ -30,8 +23,10 @@ export function make(
   if (!model) { throw new ArgumentError("No 'model' given"); }
 
   // create the initial state for the dispatch wrapper
-  let dispatch, isDispatchRunning;
-  let state = { model, queue: [] };
+  let dispatch;
+  // create the state
+  let state = { model, queue: new Queue() };
+
 
 
   let dispatchImpl = (msg)=> {
@@ -46,43 +41,27 @@ export function make(
 
 
   let dispatchMsgsInQueue = singleInstance(()=>{
-    // Dont allow recursion, just use the queue for now
-    if (isDispatchRunning) { return; }
 
-    isDispatchRunning = true;
-
-    let queue = state.queue;
-    // Dispatch messages until there is stuff in the
-    // queue.
-    //
-    // This is based on the assumption that update always returns ASAP,
-    // and any longer running stuff is issues via other systems
-    while (queue.length > 0) {
-
-      // get the first message
-      let msg = queue.shift();
-
-      if (typeof msg === 'undefined') { continue; }
-
+    state = state.queue.reduce((state, msg)=>{
       // we try to catch errors in the update here
       let updateResult = handlers.call( update, model, msg );
 
       if (updateResult.error) {
         // no more work for us for now
         onError(updateResult.error, msg, model);
-        continue;
+        return state;
       }
 
       // use the dispatcher traits to dispatch the messages
-      state = dispatcherTraits.reduce(state, updateResult.value);
-    }
+      return dispatcherTraits.reduce(state, updateResult.value);
+    }, state);
   });
 
 
   // create the dispatcher function
-  dispatch = dispatcher.make(dispatchImpl, messageTraits)
+  dispatch = dispatcher.make(dispatchImpl)
 
-  // create the initial state for the dispatch wrapper
+  // initial state for the dispatch wrapper
   state = dispatcherTraits.init(state);
 
 
