@@ -1,32 +1,32 @@
 
 
-export let DEFAULT_ROOT_DISPATCHER_TRAITS = {
-  init: (state)=> {
-    return state;
-  },
+// export let DEFAULT_ROOT_DISPATCHER_TRAITS = {
+//   init: (state)=> {
+//     return state;
+//   },
 
-  reduce: (state, { model, toParentMessages })=> {
-    state.model = model;
-    // if we have messages to the parent
-    if (toParentMessages && toParentMessages.length > 0) {
-      state.queue = state.queue.concat(toParentMessages);
-    }
-    return state;
-  }
-};
+//   reduce: (state, { model, toParentMessages })=> {
+//     state.model = model;
+//     // if we have messages to the parent
+//     if (toParentMessages && toParentMessages.length > 0) {
+//       state.queue = state.queue.concat(toParentMessages);
+//     }
+//     return state;
+//   }
+// };
 
 
-// A root dispatcher that just returns stuff
-export let  NOOP_ROOT_WRAPPER_TRAITS = {
-  init: (state)=> {
-    return state;
-  },
+// // A root dispatcher that just returns stuff
+// export let  NOOP_ROOT_WRAPPER_TRAITS = {
+//   init: (state)=> {
+//     return state;
+//   },
 
-  reduce: (state,  newModel)=> {
-    state.model = newModel;
-    return state;
-  }
-}
+//   reduce: (state,  newModel)=> {
+//     state.model = newModel;
+//     return state;
+//   }
+// }
 
 
 
