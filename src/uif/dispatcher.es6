@@ -2,9 +2,8 @@ import { DEFAULT_MSG_TRAITS } from './traits/messages_traits.es6'
 
 
 export let DEFAULT_ROOT_DISPATCHER_TRAITS = {
-  init: (model, dispatch)=> {
-    let queue = [];
-    return { model, dispatch, queue };
+  init: (state)=> {
+    return state;
   },
 
   reduce: (state, { model, toParentMessages })=> {
@@ -16,6 +15,19 @@ export let DEFAULT_ROOT_DISPATCHER_TRAITS = {
     return state;
   }
 };
+
+
+// A root dispatcher that just returns stuff
+export let  NOOP_ROOT_WRAPPER_TRAITS = {
+  init: (state)=> {
+    return state;
+  },
+
+  reduce: (state,  newModel)=> {
+    state.model = newModel;
+    return state;
+  }
+}
 
 
 
