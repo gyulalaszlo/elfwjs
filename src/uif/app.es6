@@ -6,7 +6,6 @@ import {singleInstance} from './functional.es6'
 import {Queue} from './core/queue.es6'
 
 
-
 // Dispatch messages until there is stuff in the queue.
 //
 // This is based on the assumption that update always returns ASAP, and any
@@ -35,18 +34,13 @@ export function make(
   let dispatchMsgsInQueue = singleInstance(()=>{
     state = state.queue.reduce((state, msg)=>{
 
+      // Run the update
       let result;
       try {
         // we try to catch errors in the update here
         result = update(state.model, msg );
       } catch (e) {
         onError("Error during update:", e, {state, msg});
-        return state;
-      }
-
-      // No middleware should handle an undefined value
-      if (typeof result === 'undefined') {
-        onError("Update returned an undefined value", null, {state, msg});
         return state;
       }
 
