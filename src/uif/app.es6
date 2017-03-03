@@ -3,15 +3,30 @@ import {DEFAULT_MSG_TRAITS} from './traits/messages_traits.es6'
 import * as dispatcher from './dispatcher.es6'
 import * as handlers from './handlers.es6'
 
+export let  NOOP_DISPATCH_WRAPPER_TRAITS = {
+  init: (model, dispatch)=> {
+    return { model: model, dispatch: dispatch };
+  },
+
+  reduce: ({ model, msg, dispatch }, newModel)=> {
+    return { state, model: newModel, dispatch };
+  }
+}
+
+function defaultDispatchWrapper() { }
 
 export function make(
   {model, update, view, Msg},
   messageTraits=DEFAULT_MSG_TRAITS,
+  dispatchWrapper=defaultDispatchWrapper,
   onError=console.error
 ){
 
   if (!update) { throw new ArgumentError("No 'update' given"); }
   if (!model) { throw new ArgumentError("No 'model' given"); }
+
+  // create the initial state for the dispatch wrapper
+  let dispatch, dispatchWrapperState;
 
 
   let dispatchImpl = (msg)=> {
@@ -26,6 +41,14 @@ export function make(
       return;
     }
 
+    // wrapper that wraps dispatching
+    // dispatchWrapperState = dispatchWrapper.reduce(
+    //   { state: dispatchWrapperState, model, dispatch },
+    //   updateResult.value
+    // );
+
+    // dispatchWrapperState
+
     model = updateResult.value;
 
 
@@ -36,7 +59,11 @@ export function make(
   };
 
   // create the dispatcher function
-  let dispatch = dispatcher.make(dispatchImpl, messageTraits)
+  dispatch = dispatcher.make(dispatchImpl, messageTraits)
+
+  // create the initial state for the dispatch wrapper
+  // dispatchWrapperState = dispatchWrapper.init(model, dispatch);
+
 
   return {
     dispatch,

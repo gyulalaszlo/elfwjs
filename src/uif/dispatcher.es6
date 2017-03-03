@@ -1,5 +1,24 @@
 import { DEFAULT_MSG_TRAITS } from './traits/messages_traits.es6'
 
+
+export let DEFAULT_ROOT_DISPATCHER_TRAITS = {
+  init: (model, dispatch)=> {
+    let queue = [];
+    return { model, dispatch, queue };
+  },
+
+  reduce: (state, { model, toParentMessages })=> {
+    state.model = model;
+    // if we have messages to the parent
+    if (toParentMessages && toParentMessages.length > 0) {
+      state.queue = state.queue.concat(toParentMessages);
+    }
+    return state;
+  }
+};
+
+
+
 class Dispatcher {
   // Creates a new dispatcher with the given message traits
   constructor(target, msgTraits) {

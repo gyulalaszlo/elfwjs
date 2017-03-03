@@ -86,4 +86,47 @@ describe('App', ()=>{
     expect( view ).toHaveBeenCalledWith(SAMPLE_DATA, app.dispatch);
   });
 
+
+
+  describe('parentMessage forwarding', ()=>{
+
+    // it('should re-dispatch commands returned from the update', ()=>{
+
+    //   // fake update function
+    //   let update = jasmine.createSpy('update').and.callFake((model, msg)=> {
+    //     let name = getName(msg);
+    //     if (name === 'load_data') {
+    //       console.log(model.concat(getValue(msg)));
+    //       return {
+    //         newModel: model.concat(getValue(msg)),
+    //         toParentMessages: [
+    //           Msg.compile_code(['baz'])
+    //         ]
+    //       };
+    //     } else if (name == 'compile_code') {
+    //       return {
+    //         newModel: model.concat(getValue(msg))
+    //       };
+    //     }
+    //   });
+
+
+    //   let updateWr
+
+    //   // let view = jasmine.createSpy('view');
+    //   let app = App.make({ model: [], update }, MSG_T, errorHandler);
+
+
+    //   app.dispatch.dispatch( Msg.load_data(['foo', 'bar']));
+    //   // expect
+    //   expect( update.calls.count() ).toEqual(2);
+    //   expect( update.calls.allArgs() ).toEqual([
+    //     [ [], Msg.load_data(['foo', 'bar']) ],
+    //     [ ['foo', 'bar'], Msg.compile_code(['baz']) ],
+    //   ]);
+
+    //   expect( app.model ).toEqual( ['foo', 'bar', 'baz' ]);
+    // });
+  });
+
 });
