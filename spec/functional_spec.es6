@@ -22,3 +22,8 @@ describe('singleInstance', ()=>{
   });
 
 });
+
+
+describe('pipe', ()=>{
+
+});

@@ -7,16 +7,14 @@ import {Queue} from './core/queue.es6'
 
 
 
-
 // Dispatch messages until there is stuff in the queue.
 //
 // This is based on the assumption that update always returns ASAP, and any
 // longer running stuff is issues via other systems
 export function make(
-  {model, update, view, Msg},
-  onError=console.error,
-  messageTraits=DEFAULT_MSG_TRAITS,
-  dispatcherTraits=dispatcher.DEFAULT_ROOT_DISPATCHER_TRAITS,
+  {model, update},
+  middleWare=[],
+  onError=console.error
 ){
 
   if (!update) { throw new ArgumentError("No 'update' given"); }
@@ -24,56 +22,54 @@ export function make(
 
   // create the initial state for the dispatch wrapper
   let dispatch;
-  // create the state
-  let state = { model, queue: new Queue() };
 
+  // create the state
+  let state = { model, queue: new Queue(), dispatch: null  };
 
 
   let dispatchImpl = (msg)=> {
     state.queue.push(msg);
     dispatchMsgsInQueue();
-
-    // rendering is optional for us. Helps with testing.
-    if (view) {
-      view(state.model, dispatch);
-    }
   };
 
-
   let dispatchMsgsInQueue = singleInstance(()=>{
-
     state = state.queue.reduce((state, msg)=>{
 
+      let result;
       try {
-      // we try to catch errors in the update here
-        let result = update(model, msg );
-        return dispatcherTraits.reduce(state, result);
+        // we try to catch errors in the update here
+        result = update(state.model, msg );
       } catch (e) {
-        onError(e, msg, model);
+        onError("Error during update:", e, {state, msg});
         return state;
       }
 
-      // if (updateResult.error) {
-      //   // no more work for us for now
-      //   onError(updateResult.error, msg, model);
-      //   return state;
-      // }
+      // No middleware should handle an undefined value
+      if (typeof result === 'undefined') {
+        onError("Update returned an undefined value", null, {state, msg});
+        return state;
+      }
 
-      // use the dispatcher traits to dispatch the messages
-      // return dispatcherTraits.reduce(state, updateResult.value);
+      // Run the middleware chain
+      return middleWare.reduce( (state, layer)=>{
+        try {
+          return layer(state, msg, result);
+        } catch (e) {
+          onError("Error while running middleware layer:", e, {layer, state, msg});
+          return state;
+        }
+      }, state);
+
     }, state);
   });
 
 
-  // create the dispatcher function
-  dispatch = dispatcher.make(dispatchImpl)
-
-  // initial state for the dispatch wrapper
-  state = dispatcherTraits.init(state);
+  // create the dispatcher function and make it accessible
+  state.dispatch = dispatcher.make(dispatchImpl)
 
 
   return {
-    dispatch,
+    dispatch: state.dispatch,
     model,
   };
 };

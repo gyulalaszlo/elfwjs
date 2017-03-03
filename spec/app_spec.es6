@@ -1,9 +1,10 @@
 import {DEFAULT_MSG_TRAITS} from '../src/uif/traits/messages_traits.es6'
-import * as middleware from '../src/uif/middleware.es6'
+// import * as middleware from '../src/uif/middleware.es6'
+import * as appMiddleware from '../src/uif/app-middleware.es6'
 import {NOOP_ROOT_WRAPPER_TRAITS} from '../src/uif/dispatcher.es6'
 // import handlers from '../src/uif/handlers.es6'
 import * as App from '../src/uif/app.es6'
-import {assoc} from '../src/uif/transform_object.es6'
+// import {assoc} from '../src/uif/transform_object.es6'
 
 
 
@@ -13,28 +14,65 @@ let Msg = DEFAULT_MSG_TRAITS.generator([
   'apply_transform',
 ]);
 
-let Model = ()=> {
-  return {
-    data: []
-  };
-};
+// let Model = ()=> {
+//   return {
+//     data: []
+//   };
+// };
 
 
-let Update = middleware.match({
-  load_data: (model, data)=>{
-    return {
-      newModel: assoc(model, {data}),
-      localMessages: [ Msg.apply_transform() ],
-    };
-  },
-}, DEFAULT_MSG_TRAITS);
+// let Update = middleware.match({
+//   load_data: (model, data)=>{
+//     return {
+//       newModel: assoc(model, {data}),
+//       localMessages: [ Msg.apply_transform() ],
+//     };
+//   },
+// }, DEFAULT_MSG_TRAITS);
 
 
-let View = (model, dispatch)=>
-  ['div', {className: 'input'}, [
-    ['label', {}, [ 'Hello world' ]]
-  ]]
+// let View = (model, dispatch)=>
+//   ['div', {className: 'input'}, [
+//     ['label', {}, [ 'Hello world' ]]
+//   ]]
 
+describe('app-middleware', ()=>{
+
+  describe('resultIntegrator', ()=>{
+
+
+    describe('noop', ()=>{
+      it('should simply set the model to the result', ()=>{
+        let state = { model: 'foo' };
+        let msg = null;
+        let result = 'bar';
+        let newState = appMiddleware.ResultIntegrators.noop(state, msg, result);
+        expect(newState.model).toEqual('bar');
+      });
+    });
+
+    describe('default', ()=>{
+      it('should set the model to the `model` key in the results', ()=>{
+        let state = { model: 'foo' };
+        let msg = null;
+        let result = {model: 'bar'};
+        let newState = appMiddleware.ResultIntegrators.default(state, msg, result);
+        expect(newState.model).toEqual('bar');
+      });
+    });
+
+  });
+
+
+  describe('rederer', ()=>{
+    it('should forward calls to the view with the model and the dispatch from the state', ()=>{
+        let state = { model: 'foo', dispatch: 'bar' };
+        let view = jasmine.createSpy('view');
+        let newState = appMiddleware.renderer(view)( state );
+        expect(view).toHaveBeenCalledWith('foo', 'bar');
+    });
+  });
+});
 
 
 describe('App', ()=>{
@@ -47,8 +85,8 @@ describe('App', ()=>{
     { id: 1, value: 2 },
   ];
 
-  let makeTestApp = (obj)=>
-    App.make(obj, errorHandler, MSG_T, NOOP_ROOT_WRAPPER_TRAITS );
+  let makeTestApp = (obj, middleware=[])=>
+    App.make(obj, middleware, errorHandler);
 
   beforeEach(()=> {
     errorHandler = jasmine.createSpy('errorHandler').and.callFake( console.error );;
@@ -60,8 +98,10 @@ describe('App', ()=>{
 
 
   it('should dispatch to update on message', ()=>{
-    let update = jasmine.createSpy('update');
-    let app = makeTestApp({ model: [], update });
+    let update = jasmine.createSpy('update').and.returnValue('hello');
+    let app = makeTestApp({ model: [], update }, [
+      appMiddleware.ResultIntegrators.noop,
+    ]);
 
     app.dispatch.dispatch( Msg.load_data(SAMPLE_DATA));
     expect( update ).toHaveBeenCalledWith([], Msg.load_data(SAMPLE_DATA));
@@ -75,7 +115,10 @@ describe('App', ()=>{
     }
 
     let view = jasmine.createSpy('view');
-    let app = makeTestApp({ model: [], update, view });
+    let app = makeTestApp({ model: [], update }, [
+      appMiddleware.resultIntegrator(NOOP_ROOT_WRAPPER_TRAITS.reduce),
+      appMiddleware.renderer(view),
+    ]);
 
     app.dispatch.dispatch( Msg.load_data(SAMPLE_DATA));
     expect( view ).toHaveBeenCalledWith(SAMPLE_DATA, app.dispatch);
