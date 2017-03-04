@@ -10,17 +10,19 @@ import * as Result from './core/result.es6'
 // Runs the provided middleware chain
 function runMiddlewares(middleware, onError, state, msg, result) {
   return middleware.reduce(
-    (state, layer)=> (state.map((state)=> Result.from(layer, state, msg, result)))
-  , Result.ok(state));
+    (state, layer)=>
+      state.map((state)=>
+        Result.from(layer, state, msg, result)),
+    Result.ok(state));
 }
 
 
 // Helper that dispatches messages one-by-one from the queue
 // until its empty
-function msgQueueResolver(state, middleware, update, onError) {
+function msgQueueResolver(middleware, onError, state, update) {
   return state.queue.reduce((state, msg)=>{
     return Result
-      .from( update, state.model, msg )
+      .from(update, state.model, msg)
       .map((result)=> runMiddlewares(middleware, onError, state,  msg, result))
       .withDefault(state);
   }, state);
