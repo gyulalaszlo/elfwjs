@@ -1,4 +1,4 @@
-import {replace, assoc, dissoc, update, conj, updateIn, disj} from '../src/uif/transform_object.es6'
+import {replace, assoc, dissoc, update, conj, updateIn, disj} from '../../src/uif/core/transform_object.es6'
 // Use the same spec as JSONPatch
 // [
 //   { "op": "replace", "path": "/baz", "value": "boo" },

@@ -110,20 +110,6 @@ describe('view', ()=>{
 
     });
 
-//     it('should render the given view', ()=>{
-//       viewRenderer.reduce.and.callFake( (memo, newTree)=> {
-//         memo.push(newTree);
-//         return memo;
-//       });
-
-//       let i = { name: 'div', attributes: {}, children: [], key: 'key' };
-//       let o = render(i);
-
-//       exp
-//       assert();
-
-
-//     });
   });
 
 
