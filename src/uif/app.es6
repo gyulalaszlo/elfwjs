@@ -7,16 +7,9 @@ import {Queue} from './core/queue.es6'
 import * as Result from './core/result.es6'
 
 
-// Runs the provided middleware chain
-function runMiddlewares(middleware, onError, state, msg, result) {
-  let runLayer = (state, layer)=> state.then( (v)=> layer(v, msg, result));
-  return middleware.reduce(runLayer, Result.ok(state));
-}
-
-
 // Helper that dispatches messages one-by-one from the queue
 // until its empty
-function messageHandler(middleware, onError, state, update) {
+function messageHandler(middleware, onError, update) {
   return (state, msg)=>
       // Call update
       Result.from(update, state.model, msg)
@@ -37,17 +30,23 @@ function messageHandler(middleware, onError, state, update) {
 // longer running stuff is issues via other systems
 export function make({model, update}, middleware=[], onError=console.error) {
 
-  if (!update) { throw new ArgumentError("No 'update' given"); }
-  if (!model) { throw new ArgumentError("No 'model' given"); }
+  if (typeof update === 'undefined') { throw new ArgumentError("No 'update' given"); }
+  if (typeof model === 'undefined') { throw new ArgumentError("No 'model' given"); }
 
   // create the state
   let state = { model, queue: new Queue() };
 
+  // Transforms state for each message in the queue
+  let messageQueueReducer = messageHandler(middleware, onError, update);
+
+  // Transforms state by folding the messages in the queue through
+  // `messageQueueReducer`.
+  //
+  // By keeping it singleInstance, we can avoid recursion and instead use a
+  // single flat queue.
   let dispatchMsgsInQueue = singleInstance(()=>{
     // update the state
-    let handler = messageHandler(middleware, onError, state, update);
-    state = state.queue.reduce( handler, state);
-    // state = msgQueueResolver(middleware, onError, state, update);
+    state = state.queue.reduce( messageQueueReducer, state);
   });
 
   // The actual dispatch function just pushes the message to the queue
@@ -61,10 +60,10 @@ export function make({model, update}, middleware=[], onError=console.error) {
   // create the dispatcher function and make it accessible
   state.dispatcher = dispatcher.make(dispatchImpl);
 
-
   return {
     dispatcher: ()=> state.dispatcher,
     model: ()=> state.model,
+    // f0r d3bug, plz no use if can have
     state: ()=> state,
   };
 };
