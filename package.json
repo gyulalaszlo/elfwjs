@@ -1,14 +1,14 @@
 {
-  "name": "ttuif",
+  "name": "elfw-js",
   "version": "0.0.1",
   "description": "",
   "main": "src/uif.es6",
   "directories": {
     "example": "examples",
-    "test": "test"
+    "test": "spec"
   },
   "scripts": {
-    "test": "jasmine spec/**/*.es6 spec/*.es6",
+    "test": "./node_modules/.bin/jasmine spec/**/*.es6 spec/*.es6",
     "start": "./node_modules/.bin/nodemon -e es6 --ignore \"*.js\" --exec npm run build",
     "build": "./node_modules/.bin/babel src -d lib --source-maps",
     "dist": "./node_modules/.bin/webpack"
@@ -24,6 +24,7 @@
     "babel-register": "^6.23.0",
     "babel-watch": "^2.0.6",
     "commander": "^2.9.0",
+    "jasmine": "^2.5.3",
     "nodemon": "^1.11.0",
     "webpack": "^2.2.1"
   },
