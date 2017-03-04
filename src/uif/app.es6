@@ -1,5 +1,5 @@
 import * as dispatcher from './dispatcher.es6'
-import {singleInstance} from './functional.es6'
+import {singleInstance} from './core/functional.es6'
 import {Queue} from './core/queue.es6'
 import * as Result from './core/result.es6'
 

@@ -1,4 +1,4 @@
-![travis ci status](https://travis-ci.org/gyulalaszlo/elfwjs.svg?branch=master)
+[![Build Status](https://travis-ci.org/gyulalaszlo/elfwjs.svg?branch=master)](https://travis-ci.org/gyulalaszlo/elfwjs)
 
 # elfw-js
 

@@ -1,4 +1,4 @@
-import {singleInstance, reduction} from '../src/uif/functional.es6'
+import {singleInstance, reduction} from '../../src/uif/core/functional.es6'
 
 
 describe('singleInstance', ()=>{
