@@ -65,7 +65,7 @@ describe('App', ()=>{
       appMiddleware.ResultIntegrators.noop,
     ]);
 
-    app.dispatch.dispatch( Msg.load_data(SAMPLE_DATA));
+    app.dispatcher().dispatch( Msg.load_data(SAMPLE_DATA));
     expect( update ).toHaveBeenCalledWith([], Msg.load_data(SAMPLE_DATA));
   });
 
@@ -82,8 +82,8 @@ describe('App', ()=>{
       appMiddleware.renderer(view),
     ]);
 
-    app.dispatch.dispatch( Msg.load_data(SAMPLE_DATA));
-    expect( view ).toHaveBeenCalledWith(SAMPLE_DATA, app.dispatch);
+    app.dispatcher().dispatch( Msg.load_data(SAMPLE_DATA));
+    expect( view ).toHaveBeenCalledWith(SAMPLE_DATA, app.dispatcher());
   });
 
 

@@ -6,6 +6,7 @@ import {singleInstance} from './functional.es6'
 import {Queue} from './core/queue.es6'
 
 
+
 // Dispatch messages until there is stuff in the queue.
 //
 // This is based on the assumption that update always returns ASAP, and any
@@ -19,8 +20,6 @@ export function make(
   if (!update) { throw new ArgumentError("No 'update' given"); }
   if (!model) { throw new ArgumentError("No 'model' given"); }
 
-  // create the initial state for the dispatch wrapper
-  let dispatch;
 
   // create the state
   let state = { model, queue: new Queue(), dispatch: null  };
@@ -33,7 +32,6 @@ export function make(
 
   let dispatchMsgsInQueue = singleInstance(()=>{
     state = state.queue.reduce((state, msg)=>{
-
       // Run the update
       let result;
       try {
@@ -59,11 +57,11 @@ export function make(
 
 
   // create the dispatcher function and make it accessible
-  state.dispatch = dispatcher.make(dispatchImpl)
+  state.dispatcher = dispatcher.make(dispatchImpl)
 
 
   return {
-    dispatch: state.dispatch,
-    model,
+    dispatcher: ()=> state.dispatcher,
+    model: ()=> state.model,
   };
 };
