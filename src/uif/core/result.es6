@@ -23,6 +23,22 @@ class Result {
   }
 
 
+  thread(fns, ...args) {
+    let i = 0, len = fns.length, val = this;
+
+    while (true) {
+      // if we have an error
+      if (val.error) return val;
+      // check if we have elements
+      if (i >= len) return val;
+      val = fns[i](val.value, ...args);
+      // val = from(fns[i], val.value, ...args);
+      // return on error
+
+      // next
+      ++i;
+    }
+  }
 
 }
 

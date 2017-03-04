@@ -8,44 +8,22 @@ import * as Result from './core/result.es6'
 
 
 // Runs the provided middleware chain
-function runMiddleware(middleware, onError, state, msg, result) {
-  return middleware.reduce( (state, layer)=>{
-    let { value, error } = handlers.call( layer, state, msg, result );
-    if (error) {
-      onError("Error while running middleware layer:", error, {layer, state, msg});
-      return state;
-    }
-    return value;
-  }, state);
+function runMiddlewares(middleware, onError, state, msg, result) {
+  return middleware.reduce(
+    (state, layer)=> (state.map((state)=> Result.from(layer, state, msg, result)))
+  , Result.ok(state));
 }
 
 
 // Helper that dispatches messages one-by-one from the queue
 // until its empty
 function msgQueueResolver(state, middleware, update, onError) {
-  let o =  state.queue.reduce((state, msg)=>{
-
+  return state.queue.reduce((state, msg)=>{
     return Result
       .from( update, state.model, msg )
-      .then((newState)=>{
-        // return middleware.reduce( (state, layer)=>{
-        //   let { value, error } = handlers.call( layer, state, msg, result );
-        // });
-        return runMiddleware(middleware, onError, state,  msg, newState);
-      })
+      .map((result)=> runMiddlewares(middleware, onError, state,  msg, result))
       .withDefault(state);
-    // Run the update
-    // let {value, error} = handlers.call( update, state.model, msg );
-    // if (error) {
-    //   onError("Error during update:", error, {state, msg});
-    //   return state;
-    // }
-
-    // // run the middleware if we had no errors
-    // let middlewareRes = runMiddleware(middleware, onError, state,  msg, value);
-    // return middlewareRes;
   }, state);
-  return o;
 }
 
 
@@ -81,5 +59,6 @@ export function make({model, update}, middleware=[], onError=console.error) {
   return {
     dispatcher: ()=> state.dispatcher,
     model: ()=> state.model,
+    state: ()=> state,
   };
 };

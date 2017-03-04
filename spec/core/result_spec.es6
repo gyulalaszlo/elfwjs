@@ -79,11 +79,15 @@ describe('Result', ()=> {
 
       let af = (a, c)=> result.ok(a + 1)
       let bf = (a, c)=> result.ok(a + 2)
-      let cf = (a, c)=> result.error(a+3)
+      let cf = (a, c)=> result.error(a + 3)
 
-      let a = result.thread( result.ok(1), [af, bf, cf] )
-      expect(a.value).not.toBeDefined();;
-      expect(a.error).toEqual(7);
+      let a = result.ok(1).thread([af, bf]);
+      expect(a.error).not.toBeDefined();;
+      expect(a.value).toEqual(4);
+
+      let b = result.ok(1).thread([af, bf, cf]);
+      expect(b.value).not.toBeDefined();;
+      expect(b.error).toEqual(7);
     });
   });
 });
