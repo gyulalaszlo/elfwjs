@@ -16,13 +16,18 @@ function runMiddlewares(middleware, onError, state, msg, result) {
 
 // Helper that dispatches messages one-by-one from the queue
 // until its empty
-function msgQueueResolver(middleware, onError, state, update) {
-  return state.queue.reduce((state, msg)=>{
-    return Result
-      .from(update, state.model, msg)
-      .map((result)=> runMiddlewares(middleware, onError, state,  msg, result))
-      .withDefault(state);
-  }, state);
+function messageHandler(middleware, onError, state, update) {
+  return (state, msg)=>
+      // Call update
+      Result.from(update, state.model, msg)
+        // Run the middleware
+        .map((result)=> {
+          let runLayer = (state, layer)=> state.then( (v)=> layer(v, msg, result));
+          return middleware.reduce(runLayer, Result.ok(state));
+        })
+        .mapError((err)=>{ onError(err); return err; })
+        .withDefault(state);
+
 }
 
 
@@ -40,7 +45,9 @@ export function make({model, update}, middleware=[], onError=console.error) {
 
   let dispatchMsgsInQueue = singleInstance(()=>{
     // update the state
-    state = msgQueueResolver(middleware, onError, state, update);
+    let handler = messageHandler(middleware, onError, state, update);
+    state = state.queue.reduce( handler, state);
+    // state = msgQueueResolver(middleware, onError, state, update);
   });
 
   // The actual dispatch function just pushes the message to the queue

@@ -88,6 +88,41 @@ describe('App', ()=>{
 
 
 
+
+  describe('error handling', ()=> {
+
+    it('should handler errors in update', ()=>{
+      let update = (model, msg)=> {
+        throw 'foo';
+      }
+
+      let errorHandler = jasmine.createSpy('errorHandler');
+      let app = App.make({ model: [], update }, [
+        appMiddleware.ResultIntegrators.noop,
+      ], errorHandler);
+
+      app.dispatcher().dispatch( Msg.load_data(SAMPLE_DATA));
+      expect( errorHandler ).toHaveBeenCalledWith('foo');
+    });
+
+
+    it('should handler errors in the middleware', ()=>{
+      let update = (model, msg)=> getValue(msg);
+      let view = (model, dispatch)=> { throw 'bar'; }
+
+      let errorHandler = jasmine.createSpy('errorHandler');
+      let app = App.make({ model: [], update }, [
+        appMiddleware.ResultIntegrators.noop,
+        appMiddleware.View.generateTree(view),
+      ], errorHandler);
+
+      app.dispatcher().dispatch( Msg.load_data(SAMPLE_DATA));
+      expect( errorHandler ).toHaveBeenCalledWith('bar');
+    });
+
+  });
+
+
   // describe('parentMessage forwarding', ()=>{
   //   let update = jasmine.createSpy('update').and.returnValue(
   //   'hello');
