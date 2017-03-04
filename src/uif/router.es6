@@ -1,7 +1,3 @@
-import * as Promise from 'bluebird'
-
-// import * as uifMsg from './msg.es6'
-
 import {DEFAULT_MSG_TRAITS} from './traits/messages_traits.es6'
 import {DEFAULT_CHILD_TRAITS} from './traits/child_traits.es6'
 import {

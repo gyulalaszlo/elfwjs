@@ -1,4 +1,4 @@
-import * as middleware from '../src/uif/middleware.es6'
+import * as router from '../src/uif/router.es6'
 
 import {DEFAULT_MSG_TRAITS} from '../src/uif/traits/messages_traits.es6'
 import {DEFAULT_CHILD_TRAITS} from '../src/uif/traits/child_traits.es6'
@@ -13,7 +13,7 @@ import {
 let fakeLogger = ()=> jasmine.createSpyObj("logger", ['debug', 'info', 'error']);
 
 
-describe('middleware', ()=> {
+describe('router', ()=> {
   let model, logger, msg, resp;
 
   let fakeHandler = (name, ret)=>
@@ -44,7 +44,7 @@ describe('middleware', ()=> {
       let h1 = fakeHandler('1', null);
       let h2 = fakeHandler('2', resp);
 
-      let chain = middleware.chain([ h1, h2 ]);
+      let chain = router.chain([ h1, h2 ]);
 
       expect(chain(model, msg, logger)).toEqual(resp);
       expectHandlerCalled(h1);
@@ -57,7 +57,7 @@ describe('middleware', ()=> {
       let h2 = fakeHandler('2', resp);
       let h3 = fakeHandler('3', null);
 
-      let chain = middleware.chain([ h1, h2 ]);
+      let chain = router.chain([ h1, h2 ]);
 
       expect(chain(model, msg, logger)).toEqual(resp);
       expectHandlerCalled(h1, 1);
@@ -82,21 +82,21 @@ describe('middleware', ()=> {
     it('should dispatch based on the name field of the message', ()=>{
 
         let h = handler();
-        expect(middleware.match(h)(model, mm('foo', msg), logger)).toEqual('foo');
+        expect(router.match(h)(model, mm('foo', msg), logger)).toEqual('foo');
         expectHandlerCalled(h.foo, 1);
         expectHandlerCalled(h.bar, 0);
     });
 
     it('should be able to return complex objects(?)', ()=>{
         let h = handler();
-        expect(middleware.match(h)(model, mm('bar', msg), logger)).toEqual({ bar: 'bar' });
+        expect(router.match(h)(model, mm('bar', msg), logger)).toEqual({ bar: 'bar' });
         expectHandlerCalled(h.foo, 0);
         expectHandlerCalled(h.bar, 1);
     });
 
     it('should return null if no handler key is found', ()=>{
         let h = handler();
-        expect(middleware.match(h)(model, mm('baz', msg), logger)).toEqual(null);
+        expect(router.match(h)(model, mm('baz', msg), logger)).toEqual(null);
         expectHandlerCalled(h.foo, 0);
         expectHandlerCalled(h.bar, 0);
     });
@@ -109,7 +109,7 @@ describe('middleware', ()=> {
           getName: (m)=> m.$$foo,
           getValue: (m)=> m.name
         };
-        expect(middleware.match(h, msgTraits)(model, msg, logger)).toEqual('foo');
+        expect(router.match(h, msgTraits)(model, msg, logger)).toEqual('foo');
         expectHandlerCalled(h.foo, 1, 'bar');
         expectHandlerCalled(h.bar, 0);
     });
@@ -187,7 +187,7 @@ describe('children', ()=> {
   describe('childrenFwd', ()=> {
 
     it('should forward messages to the proper children', ()=> {
-      let c = middleware.childrenFwd( childHandler, middleware.HAS_NAME("barMsg") );
+      let c = router.childrenFwd( childHandler, router.HAS_NAME("barMsg") );
       let msg = barMsg( BAZ_MSG );
 
       expect(c(model.bar, msg, logger)).toEqual({ baz: 'baz = 1 + 2'});
@@ -204,7 +204,7 @@ describe('children', ()=> {
     // Nomsg
     //
     it('should wrap messages from the children and update their model', ()=> {
-      let c = middleware.childrenBwd( 'bar', barMsg,  childHandler,
+      let c = router.childrenBwd( 'bar', barMsg,  childHandler,
         DEFAULT_CHILD_TRAITS,
         NOMSG_RESULT_TRAITS
       );
@@ -220,7 +220,7 @@ describe('children', ()=> {
     // Default
 
     it('should handle message results from the update fn', ()=> {
-      let c = middleware.childrenBwd( 'bar', barMsg, childHandlerWithMsg );
+      let c = router.childrenBwd( 'bar', barMsg, childHandlerWithMsg );
       let results = c(model, BAZ_MSG, logger);
       checkChildResults(results);
     });
@@ -228,7 +228,7 @@ describe('children', ()=> {
     // Legacy
 
     it('should handle legacy results from the update fn', ()=> {
-      let c = middleware.childrenBwd( 'bar', barMsg,  legacyChildHandler,
+      let c = router.childrenBwd( 'bar', barMsg,  legacyChildHandler,
         DEFAULT_CHILD_TRAITS,
         LEGACY_RESULT_TRAITS
       );
@@ -248,8 +248,8 @@ describe('children', ()=> {
 
 
     it('should forward messages to the child, update the model and wrap the messages', ()=>{
-      let c = middleware.children( 'bar', barMsg, childHandlerWithMsg,
-        middleware.HAS_NAME('barMsg')
+      let c = router.children( 'bar', barMsg, childHandlerWithMsg,
+        router.HAS_NAME('barMsg')
       );
       let results = c(model, barMsg(BAZ_MSG), logger);
       checkChildResults(results);
@@ -262,10 +262,10 @@ describe('children', ()=> {
 //     it('should support POST', ()=>{
 
 //       let elementFactory = ()=> { return { foo: 'foo' } };
-//       let r = middleware.rest.vector();
+//       let r = router.rest.vector();
 
 //       let model = [];
-//       let res = r([], middleware.rest.msg.POST( elementFactory() ), logger);
+//       let res = r([], router.rest.msg.POST( elementFactory() ), logger);
 //       expect(res.newModel).toEqual([{foo:'foo'}]);
 
 //     });
@@ -279,7 +279,7 @@ describe('children', ()=> {
     //     ]
     //   };
 
-    //   let c = middleware.childrenVector( barMsg, childHandlerWithMsg );
+    //   let c = router.childrenVector( barMsg, childHandlerWithMsg );
     //   let results = c(model, barMsg(BAZ_MSG), logger);
     //   checkChildResults(results);
     // });
