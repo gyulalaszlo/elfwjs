@@ -1,5 +1,6 @@
 import {Layer, layer} from '../src/uif/middleware/layer.es6'
-import {RequirementNotMet, ResultIntegrators, View} from '../src/uif/app-middleware.es6'
+import {ResultIntegrators} from '../src/uif/middleware/result-integrators.es6'
+import {View} from '../src/uif/middleware/view.es6'
 import {NOOP_ROOT_WRAPPER_TRAITS} from '../src/uif/dispatcher.es6'
 
 

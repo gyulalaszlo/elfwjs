@@ -1,8 +1,8 @@
 import {DEFAULT_MSG_TRAITS} from '../src/uif/traits/messages_traits.es6'
+import {ResultIntegrators} from '../src/uif/middleware/result-integrators.es6'
+import {View} from '../src/uif/middleware/view.es6'
 // import * as middleware from '../src/uif/middleware.es6'
-import * as appMiddleware from '../src/uif/app-middleware.es6'
 import {NOOP_ROOT_WRAPPER_TRAITS} from '../src/uif/dispatcher.es6'
-// import handlers from '../src/uif/handlers.es6'
 import * as App from '../src/uif/app.es6'
 // import {assoc} from '../src/uif/transform_object.es6'
 
@@ -62,7 +62,7 @@ describe('App', ()=>{
   it('should dispatch to update on message', ()=>{
     let update = jasmine.createSpy('update').and.returnValue('hello');
     let app = makeTestApp({ model: [], update }, [
-      appMiddleware.ResultIntegrators.noop,
+      ResultIntegrators.noop,
     ]);
 
     app.dispatcher().dispatch( Msg.load_data(SAMPLE_DATA));
@@ -78,8 +78,8 @@ describe('App', ()=>{
 
     let view = jasmine.createSpy('view');
     let app = makeTestApp({ model: [], update }, [
-      appMiddleware.ResultIntegrators.noop,
-      appMiddleware.View.generateTree(view),
+      ResultIntegrators.noop,
+      View.generateTree(view),
     ]);
 
     app.dispatcher().dispatch( Msg.load_data(SAMPLE_DATA));
@@ -98,7 +98,7 @@ describe('App', ()=>{
 
       let errorHandler = jasmine.createSpy('errorHandler');
       let app = App.make({ model: [], update }, [
-        appMiddleware.ResultIntegrators.noop,
+        ResultIntegrators.noop,
       ], errorHandler);
 
       app.dispatcher().dispatch( Msg.load_data(SAMPLE_DATA));
@@ -112,8 +112,8 @@ describe('App', ()=>{
 
       let errorHandler = jasmine.createSpy('errorHandler');
       let app = App.make({ model: [], update }, [
-        appMiddleware.ResultIntegrators.noop,
-        appMiddleware.View.generateTree(view),
+        ResultIntegrators.noop,
+        View.generateTree(view),
       ], errorHandler);
 
       app.dispatcher().dispatch( Msg.load_data(SAMPLE_DATA));
