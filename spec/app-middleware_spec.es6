@@ -1,4 +1,4 @@
-import {RequirementNotMet, Layer, ResultIntegrators, renderer} from '../src/uif/app-middleware.es6'
+import {RequirementNotMet, Layer, ResultIntegrators, View} from '../src/uif/app-middleware.es6'
 import {NOOP_ROOT_WRAPPER_TRAITS} from '../src/uif/dispatcher.es6'
 
 
@@ -11,7 +11,7 @@ describe('app-middleware', ()=>{
 
     it('should wrap a middleware', ()=>{
       let fakeMiddleware = jasmine.createSpy('fakeMiddleware');
-      let m = new Layer('fake', {}, fakeMiddleware);
+      let m = new Layer('fake', fakeMiddleware, {} );
       let state = 0, msg = 1, result = 2;
       m.apply(state, msg, result);
       expect(fakeMiddleware).toHaveBeenCalledWith(state, msg, result);
@@ -22,7 +22,7 @@ describe('app-middleware', ()=>{
 
     it('should check the requirements', ()=>{
       let fakeMiddleware = jasmine.createSpy('fakeMiddleware');
-      let m = new Layer('fake', { state: ['model', 'dispatch'], msg: ['model']}, fakeMiddleware);
+      let m = new Layer('fake', fakeMiddleware, { state: ['model', 'dispatch'], msg: ['model']});
       let state = 0, msg = 1, result = 2;
 
       expect( ()=> m.apply(state, msg, result) ).toThrow(jasmine.objectContaining({
@@ -82,12 +82,32 @@ describe('app-middleware', ()=>{
   });
 
 
-  describe('rederer', ()=>{
+
+  describe('View', ()=>{
+
+
+  describe('generateTree', ()=>{
     it('should forward calls to the view with the model and the dispatch from the state', ()=>{
-        let state = { model: 'foo', dispatcher: 'bar' };
-        let view = jasmine.createSpy('view');
-        let newState = renderer(view)( state, {}, {} );
-        expect(view).toHaveBeenCalledWith('foo', 'bar');
+      let state = { model: 'foo', dispatcher: 'bar' };
+      let view = jasmine.createSpy('view').and.returnValue('foobarbaz');
+      let newState = View.generateTree(view)( state, {}, {} );
+      expect(view).toHaveBeenCalledWith('foo', 'bar');
+      expect(newState.viewTree).toEqual('foobarbaz');
     });
   });
+
+
+  describe('generateTree', ()=>{
+
+    it('should delegate rendering to the dedicated renderer', ()=>{
+      let state = { model: 'foo', dispatcher: 'bar' };
+      let view = (model, dispatch)=> ['div', {}, [String(model)]];
+      let viewUpdater = jasmine.createSpy('viewUpdater');
+
+      // let newState = (view, viewUpdater)( state, {}, {} );
+      // expect(viewUpdater).toHaveBeenCalledWith(state, view(state.model));
+    });
+
+  });
+
 });

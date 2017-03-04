@@ -11,7 +11,8 @@ function normalizeRequirements({state, msg, result}) {
    }
 }
 
-// Helper function that checks if a list of keys in requirements  is present in obj.
+// Helper function that checks if a list of keys in requirements  is present in
+// obj.
 //
 // Example:
 //
@@ -57,9 +58,10 @@ export class RequirementNotMet extends Error {
 
 // The javascript version of a templated wrapper type for `operator()`
 export class Layer {
-  constructor(name, requirements, fn, validatorFn=requirementsNotMet) {
+  constructor(name, fn, requirements={}, mutates=[], validatorFn=requirementsNotMet) {
     this.name = name;
     this.requirements = normalizeRequirements(requirements);
+    this.mutates = mutates;
     this.fn = fn;
     this.validatorFn = validatorFn;
   }
@@ -79,8 +81,19 @@ export class Layer {
 
 
 // Factory function for returning a layer wrapped version of a function
-export function layer(name, requirements, fn, validatorFn=requirementsNotMet) {
-  let l = new Layer(name, requirements, fn, validatorFn=requirementsNotMet);
+export function layer(opts) {
+  let {name, requires, mutates, apply, validatorFn} = opts;
+
+  // validate the middleware
+  if (typeof apply === 'undefined') {
+    throw new Error("No `apply` function given for middleware");
+  }
+
+  // validator = validator || requirementsNotMet;
+  // requires = requires || {};
+  // mutates = mutates || [];
+
+  let l = new Layer(name, apply, requires, mutates, validatorFn);
   return (...args)=> l.apply(...args);
 }
 
@@ -88,21 +101,39 @@ export function layer(name, requirements, fn, validatorFn=requirementsNotMet) {
 // Middleware for creating basic application
 // -----------------------------------------
 //
-// These middleware bits allow the customization of the dispatch and
-// update process, and allow you to effect changes on them.
+// These middleware bits allow the customization of the dispatch and update
+// process, and allow you to effect changes on them.
 
-// Basic middleware for rendering a view
-export function renderer(view) {
-  return layer(
-    'renderer',
-    { state: ['model', 'dispatcher'] },
-    (state)=> {
+
+// RENDERING
+// =========
+//
+// helper view updater that does not alter anything in the state or in the
+// document
+function noopViewUpdater(state, tree) { return state; }
+
+
+export let View = {
+  // Basic middleware for rendering the view tree for a root view from the
+  // model
+  generateTree: (view)=> layer({
+    name: 'treeRenderer',
+    requires: {
+      state: ['model', 'dispatcher'],
+    },
+    mutates: ['viewTree'],
+    apply: (state)=> {
       let {model, dispatcher} = state;
-      view(model, dispatcher);
+      state.viewTree  = view(model, dispatcher);
       return state;
-    });
-}
+    },
+  }),
+};
 
+
+
+// RESULT INTEGRATION
+// ==================
 
 
 // Result integrators are middleware that "integrate" the result from the
@@ -113,13 +144,14 @@ export let ResultIntegrators = {
   // The default is to have a `model` and a `toParentMessages` key in the
   // result object. `model` will be the new model and the messages will be
   // added to the message queue.
-  default: layer(
-    'ResultIntegrators::default',
-    {
+  default: layer({
+    name: 'ResultIntegrators::default',
+    requires: {
       state: ['model', 'queue'],
       result: ['model']
     },
-    (state, msg, { model, toParentMessages })=>{
+    mutates: ['model', 'queue'],
+    apply: (state, msg, { model, toParentMessages })=>{
       state.model = model;
       // if we have messages to the parent
       if (typeof toParentMessages !== 'undefined' && toParentMessages.length > 0) {
@@ -127,15 +159,16 @@ export let ResultIntegrators = {
       }
       return state;
     }
-  ),
+  }),
 
   // Noop simply sets the model to the returned value
-  noop: layer(
-    'ResultIntegrators::noop',
-    { state: ['model'] },
-    (state, msg, result)=> {
+  noop: layer({
+    name: 'ResultIntegrators::noop',
+    requires: { state: ['model'] },
+    mutates: ['model'],
+    apply: (state, msg, result)=> {
       state.model = result;
       return state;
     }
-  ),
+  }),
 };

@@ -79,7 +79,7 @@ describe('App', ()=>{
     let view = jasmine.createSpy('view');
     let app = makeTestApp({ model: [], update }, [
       appMiddleware.ResultIntegrators.noop,
-      appMiddleware.renderer(view),
+      appMiddleware.View.generateTree(view),
     ]);
 
     app.dispatcher().dispatch( Msg.load_data(SAMPLE_DATA));

@@ -43,7 +43,7 @@ export function make({model, update}, middleware=[], onError=console.error) {
 
   let dispatchMsgsInQueue = singleInstance(()=>{
     // update the state
-    state = msgQueueResolver(state, middleware, update, onError);
+    state = msgQueueResolver(middleware, onError, state, update);
   });
 
   // The actual dispatch function just pushes the message to the queue
