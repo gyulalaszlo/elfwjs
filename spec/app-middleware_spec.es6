@@ -1,4 +1,5 @@
-import {RequirementNotMet, Layer, ResultIntegrators, View} from '../src/uif/app-middleware.es6'
+import {Layer, layer} from '../src/uif/middleware/layer.es6'
+import {RequirementNotMet, ResultIntegrators, View} from '../src/uif/app-middleware.es6'
 import {NOOP_ROOT_WRAPPER_TRAITS} from '../src/uif/dispatcher.es6'
 
 
@@ -35,6 +36,30 @@ describe('app-middleware', ()=>{
       expect(fakeMiddleware).toHaveBeenCalledWith(state, msg, result);
     });
 
+  });
+
+
+  describe('layer()', ()=>{
+    it('should add throw if no apply() given',()=>{
+      expect( ()=> layer({}) ).toThrow();
+      expect( ()=> layer({ apply: jasmine.createSpy('apply') })).not.toThrow();
+    });
+
+    it('should add the Layer to the function as `.layer()`',()=>{
+      let name = 'foo::bar';
+      let requires = { state: ['model'] };
+      let mutates = ['model'];
+      let apply = (e)=> e + "foo";
+
+      let mw = layer({name, requires, mutates, apply});
+      let l = mw.getLayer();
+
+      expect( l.getName() ).toEqual( name );
+      expect( l.getRequirements() ).toEqual( {state: ['model'], msg: [], result: []} );
+      expect( l.getMutatedFields() ).toEqual( mutates );
+      expect( l.getWrappedFn() ).toEqual( apply );
+
+    });
   });
 
 

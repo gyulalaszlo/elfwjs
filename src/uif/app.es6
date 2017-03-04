@@ -1,7 +1,4 @@
-import {DEFAULT_MSG_TRAITS} from './traits/messages_traits.es6'
-// import middleware from '../src/uif/middleware.es6'
 import * as dispatcher from './dispatcher.es6'
-import * as handlers from './handlers.es6'
 import {singleInstance} from './functional.es6'
 import {Queue} from './core/queue.es6'
 import * as Result from './core/result.es6'
@@ -20,7 +17,6 @@ function messageHandler(middleware, onError, update) {
         })
         .mapError((err)=>{ onError(err); return err; })
         .withDefault(state);
-
 }
 
 
