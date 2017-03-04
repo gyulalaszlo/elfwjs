@@ -90,10 +90,6 @@ class Result {
     return this;
   }
 
-  // match({ok, error}) {
-  //   if (typeof ok === 'undefined') throw new ArgumentError(`No 'ok' branch for match`)
-  // }
-
 }
 
 
