@@ -4,6 +4,7 @@ import * as dispatcher from './dispatcher.es6'
 import * as handlers from './handlers.es6'
 import {singleInstance} from './functional.es6'
 import {Queue} from './core/queue.es6'
+import * as Result from './core/result.es6'
 
 
 // Runs the provided middleware chain
@@ -23,16 +24,26 @@ function runMiddleware(middleware, onError, state, msg, result) {
 // until its empty
 function msgQueueResolver(state, middleware, update, onError) {
   let o =  state.queue.reduce((state, msg)=>{
-    // Run the update
-    let {value, error} = handlers.call( update, state.model, msg );
-    if (error) {
-      onError("Error during update:", error, {state, msg});
-      return state;
-    }
 
-    // run the middleware if we had no errors
-    let middlewareRes = runMiddleware(middleware, onError, state,  msg, value);
-    return middlewareRes;
+    return Result
+      .from( update, state.model, msg )
+      .then((newState)=>{
+        // return middleware.reduce( (state, layer)=>{
+        //   let { value, error } = handlers.call( layer, state, msg, result );
+        // });
+        return runMiddleware(middleware, onError, state,  msg, newState);
+      })
+      .withDefault(state);
+    // Run the update
+    // let {value, error} = handlers.call( update, state.model, msg );
+    // if (error) {
+    //   onError("Error during update:", error, {state, msg});
+    //   return state;
+    // }
+
+    // // run the middleware if we had no errors
+    // let middlewareRes = runMiddleware(middleware, onError, state,  msg, value);
+    // return middlewareRes;
   }, state);
   return o;
 }
@@ -50,6 +61,11 @@ export function make({model, update}, middleware=[], onError=console.error) {
   // create the state
   let state = { model, queue: new Queue() };
 
+  let dispatchMsgsInQueue = singleInstance(()=>{
+    // update the state
+    state = msgQueueResolver(state, middleware, update, onError);
+  });
+
   // The actual dispatch function just pushes the message to the queue
   // and calls the queue resolver (which is singleInstance-ed, so it'll
   // be non-recursive)
@@ -61,10 +77,6 @@ export function make({model, update}, middleware=[], onError=console.error) {
   // create the dispatcher function and make it accessible
   state.dispatcher = dispatcher.make(dispatchImpl);
 
-  let dispatchMsgsInQueue = singleInstance(()=>{
-    // update the state
-    state = msgQueueResolver(state, middleware, update, onError);
-  });
 
   return {
     dispatcher: ()=> state.dispatcher,

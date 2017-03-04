@@ -88,8 +88,15 @@ describe('App', ()=>{
 
 
 
-  describe('parentMessage forwarding', ()=>{
+  // describe('parentMessage forwarding', ()=>{
+  //   let update = jasmine.createSpy('update').and.returnValue(
+  //   'hello');
+  //   let app = makeTestApp({ model: [], update }, [
+  //     appMiddleware.ResultIntegrators.noop,
+  //   ]);
 
-  });
+  //   app.dispatcher().dispatch( Msg.load_data(SAMPLE_DATA));
+  //   expect( update ).toHaveBeenCalledWith([], Msg.load_data(SAMPLE_DATA));
+  // });
 
 });
