@@ -9,11 +9,8 @@ import * as Result from './core/result.es6'
 
 // Runs the provided middleware chain
 function runMiddlewares(middleware, onError, state, msg, result) {
-  return middleware.reduce(
-    (state, layer)=>
-      state.map((state)=>
-        Result.from(layer, state, msg, result)),
-    Result.ok(state));
+  let runLayer = (state, layer)=> state.then( (v)=> layer(v, msg, result));
+  return middleware.reduce(runLayer, Result.ok(state));
 }
 
 

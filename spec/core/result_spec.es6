@@ -14,7 +14,18 @@ describe('Result', ()=> {
 
     expect(err.error).toEqual('Bad things');
     expect(err.value).not.toBeDefined();
+
+    expect(err.isOk()).toBeFalsy();
+    expect(err.isError()).toBeTruthy();
+
+    expect(ok.isOk()).toBeTruthy();
+    expect(ok.isError()).toBeFalsy();
+
+    expect(ok.kind()).toEqual( result.OK );
+    expect(err.kind()).toEqual( result.ERROR );
   });
+
+
 
 
   describe('map', ()=> {
@@ -73,7 +84,7 @@ describe('Result', ()=> {
     });
   });
 
-  describe('reduce', ()=>{
+  describe('thread', ()=>{
 
     it('should chain until there is an error', ()=> {
 
@@ -81,13 +92,64 @@ describe('Result', ()=> {
       let bf = (a, c)=> result.ok(a + 2)
       let cf = (a, c)=> result.error(a + 3)
 
-      let a = result.ok(1).thread([af, bf]);
+      let a = result.ok(1).threadMap([af, bf]);
       expect(a.error).not.toBeDefined();;
       expect(a.value).toEqual(4);
 
-      let b = result.ok(1).thread([af, bf, cf]);
+      let b = result.ok(1).threadMap([af, bf, cf]);
       expect(b.value).not.toBeDefined();;
       expect(b.error).toEqual(7);
+    });
+
+  });
+
+
+  describe('threadAsFirst', ()=>{
+
+    it('should chain until there is an exception', ()=> {
+
+      let af = (a, c)=> a + 1
+      let bf = (a, c)=> a + 2
+      let cf = (a, c)=> a + 3
+      let df = (a, c)=> { throw 'foo'; }
+
+      let a = result.ok(1).threadAsFirst([af, bf]);
+      expect(a.error).not.toBeDefined();
+      expect(a.value).toEqual(4);
+
+      let b = result.ok(1).threadAsFirst([af, bf, cf]);
+      expect(b.error).not.toBeDefined();;
+      expect(b.value).toEqual(7);
+
+
+      let c = result.ok(1).threadAsFirst([af, bf, cf, df]);
+      expect(c.error).toEqual('foo');
+      expect(c.value).not.toBeDefined();;
+    });
+  });
+
+
+  describe('threadReduce', ()=>{
+
+    it('should chain until there is an exception', ()=> {
+
+      let af = (a, c)=> a + 1
+      let bf = (a, c)=> a + 2
+      let cf = (a, c)=> a + 3
+      let df = (a, c)=> { throw 'foo'; }
+
+      let a = result.ok(1).threadAsFirst([af, bf]);
+      expect(a.error).not.toBeDefined();
+      expect(a.value).toEqual(4);
+
+      let b = result.ok(1).threadAsFirst([af, bf, cf]);
+      expect(b.error).not.toBeDefined();;
+      expect(b.value).toEqual(7);
+
+
+      let c = result.ok(1).threadAsFirst([af, bf, cf, df]);
+      expect(c.error).toEqual('foo');
+      expect(c.value).not.toBeDefined();;
     });
   });
 });
