@@ -1,5 +1,7 @@
 import {DEFAULT_ROOT_DISPATCHER_TRAITS, NOOP_ROOT_WRAPPER_TRAITS} from './dispatcher.es6'
 
+// REQUIREMENTS
+// ============
 
 function normalizeRequirements({state, msg, result}) {
    return {
@@ -41,12 +43,17 @@ function requirementsNotMet(requirements, obj) {
   }, {});
 }
 
+// Exception class when requirements are not met
 export class RequirementNotMet extends Error {
-  constructor(errors) {
-    super(`Middleware requirements not met: ${JSON.stringify(errors, null, '  ')}`);
+  constructor(label, errors) {
+    super(`${label} requirements not met: ${JSON.stringify(errors, null, '  ')}`);
     this.errorFields = errors;
   }
 }
+
+
+// Metadata for a middleware layer
+// ===============================
 
 // The javascript version of a templated wrapper type for `operator()`
 export class Layer {
@@ -64,32 +71,20 @@ export class Layer {
   apply(state, msg, result) {
     let errors = this.validatorFn( this.requirements, {state, msg, result});
     if (Object.keys(errors).length > 0) {
-      throw new RequirementNotMet(errors);
+      throw new RequirementNotMet(`[middleware::${this.name}]`, errors);
     }
     return this.fn(state, msg, result);
   }
 }
 
 
+// Factory function for returning a layer wrapped version of a function
 export function layer(name, requirements, fn, validatorFn=requirementsNotMet) {
   let l = new Layer(name, requirements, fn, validatorFn=requirementsNotMet);
   return (...args)=> l.apply(...args);
 }
 
-// Helper that returns a wrapper for checking the state for keys.
 //
-// Throws an error if the required keys arent present in the state map.
-function requiresInState(keys, fn) {
-  return (state, ...args)=> {
-    keys.forEach((k)=> {
-      if (typeof state[k] === 'undefined') {
-        throw new Error(`Key '${k}' not found in state for middleware.`);
-      }
-    });
-    return fn(state, ...args);
-  }
-}
-
 // Middleware for creating basic application
 // -----------------------------------------
 //

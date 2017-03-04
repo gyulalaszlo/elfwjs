@@ -4,13 +4,23 @@
 // Allows only a single instance of the function to run
 export function singleInstance(fn) {
   let isRunning = false;
-  return (...args)=> {
-    if (isRunning) return null;
+  return (defaultValue, ...args)=> {
+    if (isRunning) return defaultValue;
     isRunning = true;
-    fn(...args);
+    let o = fn(...args);
     isRunning = false;
+    return o;
   };
 }
 
+
+
+export function reduction(fn, init) {
+  let memo = init;
+  return (el)=> {
+    memo = fn(memo, el);
+    return memo;
+  }
+}
 
 
