@@ -33,7 +33,29 @@ describe('dispatcher', ()=>{
   });
 
 
+  describe('emitter', ()=> {
+    it('should create a function that dispatches a message', ()=> {
+      let h = jasmine.createSpy('handler');
+      let e = jasmine.createSpyObj(['preventDefault']);
+      let d = dispatcher.make(h);
+      let eh = d.event( h, 3, 4, 5);
+      expect( eh(e) ).toBeFalsy();
+      expect(h.calls.argsFor(0)).toEqual([3, 4, 5, e]);
+      expect(e.preventDefault.calls.count()).toEqual(1);
+    });
+  });
 
+  describe('event', ()=> {
+    it('should create an event handler', ()=> {
+      let h = jasmine.createSpy('handler');
+      let e = jasmine.createSpyObj(['preventDefault']);
+      let d = dispatcher.make(h);
+      let eh = d.event( h, 3, 4, 5);
+      expect( eh(e) ).toBeFalsy();
+      expect(h.calls.argsFor(0)).toEqual([3, 4, 5, e]);
+      expect(e.preventDefault.calls.count()).toEqual(1);
+    });
+  });
 
 });
 

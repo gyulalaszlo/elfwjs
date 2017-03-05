@@ -187,7 +187,10 @@ describe('children', ()=> {
   describe('childrenFwd', ()=> {
 
     it('should forward messages to the proper children', ()=> {
-      let c = router.childrenFwd( childHandler, router.HAS_NAME("barMsg") );
+      let c = router.childrenFwd({
+        update: childHandler,
+        onlyIf: router.HAS_NAME("barMsg"),
+      });
       let msg = barMsg( BAZ_MSG );
 
       expect(c(model.bar, msg, logger)).toEqual({ baz: 'baz = 1 + 2'});
@@ -200,14 +203,25 @@ describe('children', ()=> {
   //
 
   describe('childrenBwd', ()=> {
+    let errorHandler;
+
+    beforeEach(()=>{
+      errorHandler = jasmine.createSpy('errorHandler').and.callFake(console.error);
+    });
+
+    afterEach(()=>{
+      expect(errorHandler).not.toHaveBeenCalled();
+    });
 
     // Nomsg
     //
     it('should wrap messages from the children and update their model', ()=> {
-      let c = router.childrenBwd( 'bar', barMsg,  childHandler,
-        DEFAULT_CHILD_TRAITS,
-        NOMSG_RESULT_TRAITS
-      );
+      let c = router.childrenBwd( {
+        key: 'bar', msg: barMsg,  update: childHandler,
+        childTraits: DEFAULT_CHILD_TRAITS,
+        resultTraits: NOMSG_RESULT_TRAITS,
+        errorHandler: errorHandler,
+      });
 
       expect(c(model, BAZ_MSG, logger)).toEqual({
         foo: 'foo',
@@ -220,18 +234,41 @@ describe('children', ()=> {
     // Default
 
     it('should handle message results from the update fn', ()=> {
-      let c = router.childrenBwd( 'bar', barMsg, childHandlerWithMsg );
+      let c = router.childrenBwd( {
+        key: 'bar', msg: barMsg, update: childHandlerWithMsg, errorHandler
+      });
       let results = c(model, BAZ_MSG, logger);
       checkChildResults(results);
     });
 
+    it('should return null if the nested handler returned null', ()=> {
+      let handler = ()=> { return null };
+      let c = router.childrenBwd({
+        key: 'bar', msg: barMsg, update: handler, errorHandler
+      });
+      let results = c(model, BAZ_MSG, logger);
+      expect(results).toEqual(null);
+    });
+
+
+    it('should errrors in the nested handler', ()=> {
+      let handler = ()=> { throw 'foo'; };
+      let errorHandler = jasmine.createSpy('failing errorHandler');
+      let c = router.childrenBwd({
+        key: 'bar', msg: barMsg, update: handler, errorHandler
+      });
+      expect( ()=>  c(model, BAZ_MSG, logger)).not.toThrow();
+      expect( errorHandler.calls.count() ).toEqual(1);
+    });
     // Legacy
 
     it('should handle legacy results from the update fn', ()=> {
-      let c = router.childrenBwd( 'bar', barMsg,  legacyChildHandler,
-        DEFAULT_CHILD_TRAITS,
-        LEGACY_RESULT_TRAITS
-      );
+      let c = router.childrenBwd( {
+        key: 'bar', msg: barMsg, update: legacyChildHandler,
+        childTraits: DEFAULT_CHILD_TRAITS,
+        resultTraits: LEGACY_RESULT_TRAITS,
+        errorHandler: errorHandler,
+      });
 
       let result = c(model, BAZ_MSG, logger);
       checkChildResults(LEGACY_RESULT_TRAITS.unpack(result));
@@ -248,11 +285,28 @@ describe('children', ()=> {
 
 
     it('should forward messages to the child, update the model and wrap the messages', ()=>{
-      let c = router.children( 'bar', barMsg, childHandlerWithMsg,
-        router.HAS_NAME('barMsg')
-      );
+      let errorHandler = jasmine.createSpy('failing errorHandler');
+      let c = router.children({
+          key: 'bar',
+          msg: barMsg,
+          update: childHandlerWithMsg,
+          onlyIf: router.HAS_NAME('barMsg'),
+          errorHandler: errorHandler,
+      });
       let results = c(model, barMsg(BAZ_MSG), logger);
       checkChildResults(results);
+      expect( errorHandler ).not.toHaveBeenCalled();
+    });
+
+    it('should call the error handler for errors', ()=>{
+      let errorHandler = jasmine.createSpy('failing errorHandler');
+      let handler = ()=> { throw 'foo'; };
+      let c = router.children({
+        key: 'bar', msg: barMsg, update: handler,
+        errorHandler: errorHandler,
+      });
+      expect( ()=> c(model, barMsg(BAZ_MSG), logger) ).not.toThrow();
+      expect( errorHandler.calls.count() ).toEqual(1);
     });
   });
 
