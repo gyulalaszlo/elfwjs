@@ -96,6 +96,16 @@ export function childrenBwd(
   return (oldModel, inMsg, ...args)=> {
     let child = get(oldModel, key);
     let result = null;
+    // Result.from(update, child, inMsg, ...args )
+    //   // filter nulls
+    //   .map( (r)=> r === null
+    //     ? Result.error(`Child handler '${key}' returned null`)
+    //     : Result.ok(r))
+    //   //
+    //   .then( (result)=> {
+
+    //   })
+    //   .withDefault( null );
     try {
       result = update( child, inMsg, ...args );
     } catch (e) {
@@ -157,7 +167,7 @@ export function children({
     errorHandler=console.error
 }) {
   let bwdHandler = childrenBwd( {
-    key, msg, update, 
+    key, msg, update,
     childTraits, resultTraits, errorHandler
   });
   let fwdHandler = childrenFwd({ update: bwdHandler, onlyIf, msgTraits });
