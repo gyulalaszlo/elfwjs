@@ -1,16 +1,18 @@
 'use strict';
 
 var path = require('path');
+var ClosureCompilerPlugin = require('webpack-closure-compiler');
 
 // webpack.config.js
 module.exports =  {
   entry: [
     // Set up an ES6-ish environment
     'babel-polyfill',
-    './src/uif.es6',
+    './elfw.es6',
   ],
   output: {
-    filename: 'dist/uif.js'
+    path: path.join(__dirname, '/dist/'),
+    filename: 'elfw.min.js',
   },
   resolve: {
     extensions: ['.js', '.es6']
@@ -22,21 +24,28 @@ module.exports =  {
     loaders: [
       {
         loader: 'babel-loader',
-
-        // Skip any files outside of your project's `src` directory
         include: [
           path.resolve(__dirname, "src"),
         ],
-
-        // Only run `.js` and `.jsx` files through Babel
         test: /\.es6$/,
-        // test: /\.js$/,
-
-        // exclude: /(node_modules|bower_components)/,
+        exclude: /(node_modules|bower_components)/,
         query: {
           presets: ['env', 'es2015']
         }
-      }
+      },
     ]
-  }
+  },
+
+  plugins: [
+    new ClosureCompilerPlugin({
+      compiler: {
+        language_in: 'ECMASCRIPT6',
+        language_out: 'ECMASCRIPT5',
+        compilation_level: 'ADVANCED'
+      },
+      concurrency: 3,
+    })
+  ]
+
+
 }
