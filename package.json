@@ -2,7 +2,7 @@
   "name": "elfw-js",
   "version": "0.0.1",
   "description": "",
-  "main": "src/uif.es6",
+  "main": "src/uif/app.es6",
   "directories": {
     "example": "examples",
     "test": "spec"

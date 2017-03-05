@@ -22,6 +22,14 @@ class Dispatcher {
       (msg, ...args)=> target(msgGenerator(msg), ...args)
     );
   }
+
+  event(handler, ...args) {
+    return (e)=> {
+      e.preventDefault();
+      this.dispatch(handler(...args, e));
+      return false;
+    }
+  }
 }
 
 export function make(target) {

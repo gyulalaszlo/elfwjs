@@ -88,14 +88,14 @@ export function childrenBwd(
   { get, update, wrapMsg }=DEFAULT_CHILD_TRAITS,
   { pack, unpack } = DEFAULT_RESULT_TRAITS
 ) {
-  return (model, msg, ...args)=> {
-    let child = get(model, childKey);
+  return (oldModel, msg, ...args)=> {
+    let child = get(oldModel, childKey);
     // unpack the return
-    let {newModel, localMessages, toParentMessages, toRootMessages}
+    let {model, localMessages, toParentMessages, toRootMessages}
       = unpack(handler( child, msg, ...args ));
 
     // update the child model
-    let modelOut = update( model, childKey, newModel );
+    let modelOut = update( oldModel, childKey, model );
 
     // wrap messages that are local to the child
     let wrappedChildMsgs = localMessages
@@ -103,7 +103,7 @@ export function childrenBwd(
       : undefined;
 
     return pack({
-      newModel: modelOut,
+      model: modelOut,
       localMessages: wrappedChildMsgs,
       // No messages for our parent
       //

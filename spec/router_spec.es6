@@ -148,7 +148,7 @@ describe('children', ()=> {
 
   let childHandlerWithMsg = (mdl, msg, logger)=> {
     return {
-      newModel: childHandler(mdl, msg, logger),
+      model: childHandler(mdl, msg, logger),
       localMessages: [ FOOBAR_MSG ]
     };
   };
@@ -156,14 +156,14 @@ describe('children', ()=> {
 
   // Default results check
   let checkChildResults = ({
-    newModel, localMessages,
+    model, localMessages,
     toParentMessages, toRootMessages
   })=> {
     expect(localMessages).toEqual([ barMsg(FOOBAR_MSG) ]);
     expect(toParentMessages).toEqual(undefined);
     expect(toRootMessages).toEqual(undefined);
 
-    expect(newModel).toEqual({
+    expect(model).toEqual({
       foo: 'foo',
       bar: { baz: 'baz = 1 + 2' }
     });

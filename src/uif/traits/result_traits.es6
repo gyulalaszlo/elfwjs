@@ -5,25 +5,25 @@
 // Result traits for results without a returning message (AKA only the model is
 // returned)
 export const NOMSG_RESULT_TRAITS = {
-  pack: ({newModel, localMessages, toParentMessages, rootMessages})=> {
-    return newModel;
+  pack: ({model, localMessages, toParentMessages, rootMessages})=> {
+    return model;
   },
 
   unpack: (results)=> {
-    return { newModel: results };
+    return { model: results };
   }
 }
 
 // Legacy result wrappers for older components
 export const LEGACY_RESULT_TRAITS = {
 
-  pack: ({newModel, localMessages, toParentMessages, toRootMessages})=> {
-    return [ newModel, localMessages, toParentMessages, toRootMessages ]
+  pack: ({model, localMessages, toParentMessages, toRootMessages})=> {
+    return [ model, localMessages, toParentMessages, toRootMessages ]
   },
 
   unpack: (res)=> {
-    let [newModel, localMessages, toParentMessages, toRootMessages] = res;
-    return { newModel, localMessages, toParentMessages, toRootMessages };
+    let [model, localMessages, toParentMessages, toRootMessages] = res;
+    return { model, localMessages, toParentMessages, toRootMessages };
   }
 };
 
@@ -33,7 +33,7 @@ export const LEGACY_RESULT_TRAITS = {
 export const DEFAULT_RESULT_TRAITS = {
 
   // default result layout is:
-  // {newModel, localMessages, toParentMessages, toRootMessages}
+  // {model, localMessages, toParentMessages, toRootMessages}
   pack: (res)=> res,
   unpack: (res)=>res
 };

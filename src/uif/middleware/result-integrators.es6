@@ -19,11 +19,11 @@ export let ResultIntegrators = {
       result: ['model']
     },
     mutates: ['model', 'queue'],
-    apply: (state, msg, { model, toParentMessages })=>{
+    apply: (state, msg, { model, toParentMessages, localMessages })=>{
       state.model = model;
       // if we have messages to the parent
-      if (typeof toParentMessages !== 'undefined' && toParentMessages.length > 0) {
-        state.queue = state.queue.concat(toParentMessages);
+      if (typeof localMessages !== 'undefined' && localMessages.length > 0) {
+        state.queue = state.queue.concat(localMessages);
       }
       return state;
     }

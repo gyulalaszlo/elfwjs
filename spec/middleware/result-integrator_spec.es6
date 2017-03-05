@@ -28,7 +28,7 @@ describe('middleware::ResultIntegrators', ()=>{
       // create a fake dispatcher
       let state = { queue: [], model: 'foo'}
       let msg = null;
-      let result = {model: 'bar', toParentMessages: [{ name: 'foo' }]};
+      let result = {model: 'bar', localMessages: [{ name: 'foo' }]};
 
       let newState = ResultIntegrators.default(state, msg, result);
       expect( newState.model ).toEqual('bar');
